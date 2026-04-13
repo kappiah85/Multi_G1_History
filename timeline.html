@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timeline — World History Explorer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <a href="index.html" class="brand__link">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div>
+          <h1 class="brand__title">World History Explorer</h1>
+          <p class="tagline">Continent timeline (algorithms)</p>
+        </div>
+      </a>
+    </div>
+    <nav class="toolbar" aria-label="Page tools">
+      <a href="index.html" class="btn">Globe</a>
+      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+    </nav>
+    <p class="theme-hint" id="themeColorHint">
+      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+    </p>
+  </header>
+
+  <nav class="section-nav" aria-label="Site pages">
+    <span class="section-nav__label">Pages</span>
+    <ul class="section-nav__list">
+      <li><a href="index.html" class="section-nav__link">Globe</a></li>
+      <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
+      <li><a href="timeline.html" class="section-nav__link is-active" aria-current="page">Timeline</a></li>
+      <li><a href="algorithms.html" class="section-nav__link">Algorithms</a></li>
+    </ul>
+  </nav>
+
+  <main class="layout layout--subpage">
+    <aside id="section-timeline" class="continent-timeline-aside timeline-page__panel" aria-labelledby="timeline-heading">
+      <h2 id="timeline-heading">Continent timeline (algorithms)</h2>
+      <p class="aside-lead">
+        Each region has its own vertical story. The spine is rasterized with <strong>DDA</strong> or <strong>Bresenham</strong> (your choice);
+        events use the <strong>midpoint circle</strong>; smooth links are <strong>quadratic Bézier</strong> chords, each drawn as a line algorithm.
+        Cohen–Sutherland <strong>clips</strong> segments to the inner window.
+      </p>
+      <div class="continent-timeline-toolbar">
+        <label>
+          Continent
+          <select id="continentTimelineSelect" aria-label="Select continent timeline"></select>
+        </label>
+        <label>
+          Line algorithm
+          <select id="continentLineMode" aria-label="Line drawing algorithm">
+            <option value="dda">DDA</option>
+            <option value="bresenham">Bresenham</option>
+          </select>
+        </label>
+        <button type="button" id="btnContinentTimelinePlay" class="btn btn--primary">Play timeline</button>
+      </div>
+      <canvas id="continentTimelineCanvas" width="320" height="520" aria-label="Animated continent timeline canvas"></canvas>
+      <p id="continentTimelineStatus" class="timeline-status">Choose a continent and press Play timeline.</p>
+    </aside>
+  </main>
+
+  <script type="module" src="js/page-timeline.js"></script>
+</body>
+</html>

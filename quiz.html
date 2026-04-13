@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz — World History Explorer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <a href="index.html" class="brand__link">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div>
+          <h1 class="brand__title">World History Explorer</h1>
+          <p class="tagline">World history quiz</p>
+        </div>
+      </a>
+    </div>
+    <nav class="toolbar" aria-label="Page tools">
+      <a href="index.html" class="btn">Globe</a>
+      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+    </nav>
+    <p class="theme-hint" id="themeColorHint">
+      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+    </p>
+  </header>
+
+  <nav class="section-nav" aria-label="Site pages">
+    <span class="section-nav__label">Pages</span>
+    <ul class="section-nav__list">
+      <li><a href="index.html" class="section-nav__link">Globe</a></li>
+      <li><a href="quiz.html" class="section-nav__link is-active" aria-current="page">Quiz</a></li>
+      <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
+      <li><a href="algorithms.html" class="section-nav__link">Algorithms</a></li>
+    </ul>
+  </nav>
+
+  <main class="layout layout--subpage">
+    <section id="section-quiz" class="quiz-hub" aria-labelledby="quiz-hub-heading">
+      <h2 id="quiz-hub-heading" class="quiz-hub__title">World history quiz</h2>
+      <p class="quiz-hub__intro">
+        Test yourself on events tied to each continent. Pick a focus or mix everything, then check your answers—
+        great revision after exploring the globe.
+      </p>
+      <div class="quiz-hub__controls">
+        <label class="quiz-hub__select-label">
+          Focus
+          <select id="worldQuizScope" class="quiz-hub__select" aria-label="Quiz focus region">
+            <option value="">All continents (mixed)</option>
+          </select>
+        </label>
+        <button type="button" id="worldQuizStart" class="btn btn--primary">Start 5 questions</button>
+      </div>
+      <div id="worldQuizArea" class="quiz-hub__area" hidden></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/page-quiz.js"></script>
+</body>
+</html>

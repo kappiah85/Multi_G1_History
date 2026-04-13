@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algorithms — World History Explorer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <a href="index.html" class="brand__link">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div>
+          <h1 class="brand__title">World History Explorer</h1>
+          <p class="tagline">Graphics algorithms (Canvas 2D)</p>
+        </div>
+      </a>
+    </div>
+    <nav class="toolbar" aria-label="Page tools">
+      <a href="index.html" class="btn">Globe</a>
+      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+    </nav>
+    <p class="theme-hint" id="themeColorHint">
+      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+    </p>
+  </header>
+
+  <nav class="section-nav" aria-label="Site pages">
+    <span class="section-nav__label">Pages</span>
+    <ul class="section-nav__list">
+      <li><a href="index.html" class="section-nav__link">Globe</a></li>
+      <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
+      <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
+      <li><a href="algorithms.html" class="section-nav__link is-active" aria-current="page">Algorithms</a></li>
+    </ul>
+  </nav>
+
+  <main class="layout layout--subpage layout--algorithms">
+    <section id="section-algorithms" class="algo-section" aria-labelledby="algo-heading">
+      <h2 id="algo-heading">Graphics algorithms (Canvas 2D)</h2>
+      <p class="algo-intro">
+        Demonstrations of line rasterization (DDA), midpoint circle, quadratic Bézier curves, and
+        Cohen–Sutherland clipping with window-to-viewport mapping. These complement the 3D pipeline
+        (translation, rotation, scaling, perspective) handled by Three.js for the globe.
+      </p>
+      <canvas id="algoCanvas" width="640" height="360" aria-label="Algorithm demonstration canvas"></canvas>
+      <ul class="algo-legend" id="algoLegend"></ul>
+    </section>
+  </main>
+
+  <script type="module" src="js/page-algorithms.js"></script>
+</body>
+</html>

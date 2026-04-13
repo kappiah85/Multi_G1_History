@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Globe — World History Explorer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand__icon" aria-hidden="true">◉</span>
+      <div>
+        <h1>World History Explorer</h1>
+        <p class="tagline">Interactive 3D Earth · History · Multimedia</p>
+      </div>
+    </div>
+    <nav class="toolbar" aria-label="Globe controls">
+      <button type="button" id="btnToggleRotation" class="btn btn--primary" aria-pressed="true">
+        Pause rotation
+      </button>
+      <button type="button" id="btnResetCamera" class="btn">Reset view</button>
+      <button type="button" id="btnToggleWireframe" class="btn" aria-pressed="false">Wireframe</button>
+      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+    </nav>
+    <p class="theme-hint" id="themeColorHint">
+      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+    </p>
+  </header>
+
+  <nav class="section-nav" aria-label="Site pages">
+    <span class="section-nav__label">Pages</span>
+    <ul class="section-nav__list">
+      <li><a href="index.html" class="section-nav__link is-active" aria-current="page">Globe</a></li>
+      <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
+      <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
+      <li><a href="algorithms.html" class="section-nav__link">Algorithms</a></li>
+    </ul>
+  </nav>
+
+  <main class="layout layout--globe-page">
+    <div class="layout-main-row">
+      <div class="layout-main-row__globe">
+        <section id="section-globe" class="globe-section" aria-labelledby="globe-heading">
+          <h2 id="globe-heading" class="section-heading">Interactive globe</h2>
+          <div id="globe-container" class="globe-container" role="application" aria-label="Rotatable 3D globe. Click a continent to learn more."></div>
+          <p class="hint">Drag to rotate · Scroll to zoom · Click land regions to open history panels</p>
+          <aside class="continent-nav" aria-label="Continent shortcuts">
+            <span class="continent-nav__label">Jump to:</span>
+            <div class="continent-nav__buttons" id="continentQuickNav"></div>
+          </aside>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <aside id="infoPanel" class="info-panel" aria-hidden="true" aria-labelledby="panelTitle">
+    <button type="button" class="info-panel__close" id="btnClosePanel" aria-label="Close panel">&times;</button>
+    <div class="info-panel__inner">
+      <h2 id="panelTitle" class="info-panel__title"></h2>
+      <p id="panelOverview" class="info-panel__text"></p>
+
+      <h3 class="info-panel__subtitle">Key statistics</h3>
+      <dl class="stats" id="panelStats"></dl>
+
+      <h3 class="info-panel__subtitle">Timeline highlights</h3>
+      <ul class="event-list" id="panelEvents"></ul>
+
+      <h3 class="info-panel__subtitle">Quick quiz</h3>
+      <div id="panelQuiz" class="panel-quiz"></div>
+
+      <h3 class="info-panel__subtitle">Maps &amp; imagery</h3>
+      <div class="media-row" id="panelImages"></div>
+
+      <h3 class="info-panel__subtitle">Narration</h3>
+      <audio id="panelAudio" class="media-audio" controls preload="metadata"></audio>
+
+      <h3 class="info-panel__subtitle">Video</h3>
+      <video id="panelVideo" class="media-video" controls playsinline preload="metadata"></video>
+
+      <p class="info-panel__note" id="panelMediaNote"></p>
+    </div>
+  </aside>
+  <div id="panelBackdrop" class="backdrop" hidden></div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
