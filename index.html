@@ -86,14 +86,21 @@
       <canvas id="panelTimelineCanvas" width="300" height="420" class="panel-timeline-canvas" aria-label="Animated timeline for selected continent"></canvas>
       <p id="panelTimelineStatus" class="timeline-status panel-timeline-status">Open a region from the globe, then press Play timeline.</p>
 
-      <h3 class="info-panel__subtitle">Maps &amp; imagery</h3>
+      <h3 class="info-panel__subtitle">Reference maps</h3>
       <div class="media-row" id="panelImages"></div>
 
-      <h3 class="info-panel__subtitle">Narration</h3>
-      <audio id="panelAudio" class="media-audio" controls preload="metadata"></audio>
-
       <h3 class="info-panel__subtitle">Video</h3>
-      <video id="panelVideo" class="media-video" controls playsinline preload="metadata"></video>
+      <div id="panelVideoYoutubeWrap" class="media-video-youtube" hidden>
+        <iframe
+          id="panelVideoYoutube"
+          class="media-video-youtube__iframe"
+          title="Region history video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+      <video id="panelVideo" class="media-video" controls playsinline preload="metadata" hidden></video>
 
       <p class="info-panel__note" id="panelMediaNote"></p>
     </div>

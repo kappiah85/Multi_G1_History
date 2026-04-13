@@ -44,7 +44,6 @@ function openPanel(continentId) {
 
   const panel = document.getElementById('infoPanel');
   const backdrop = document.getElementById('panelBackdrop');
-  const audio = document.getElementById('panelAudio');
   const video = document.getElementById('panelVideo');
 
   document.getElementById('panelTitle').textContent = data.label;
@@ -101,16 +100,29 @@ function openPanel(continentId) {
     el.src = img.src;
     el.alt = img.alt;
     el.loading = 'lazy';
+    el.referrerPolicy = 'no-referrer';
+    el.decoding = 'async';
     imagesEl.appendChild(el);
   }
 
-  audio.pause();
-  audio.src = data.audio || '';
-  audio.load();
-
-  video.pause();
-  video.src = data.video || '';
-  video.load();
+  const ytWrap = document.getElementById('panelVideoYoutubeWrap');
+  const ytIframe = document.getElementById('panelVideoYoutube');
+  const youtubeId = data.youtubeId?.trim();
+  if (youtubeId && ytWrap && ytIframe) {
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+    video.hidden = true;
+    ytWrap.hidden = false;
+    ytIframe.src = `https://www.youtube.com/embed/${encodeURIComponent(youtubeId)}`;
+  } else {
+    if (ytWrap) ytWrap.hidden = true;
+    if (ytIframe) ytIframe.removeAttribute('src');
+    video.hidden = false;
+    video.pause();
+    video.src = data.video || '';
+    video.load();
+  }
 
   document.getElementById('panelMediaNote').textContent = data.mediaNote || '';
 
@@ -123,14 +135,17 @@ function openPanel(continentId) {
 function closePanel() {
   const panel = document.getElementById('infoPanel');
   const backdrop = document.getElementById('panelBackdrop');
-  const audio = document.getElementById('panelAudio');
   const video = document.getElementById('panelVideo');
+  const ytWrap = document.getElementById('panelVideoYoutubeWrap');
+  const ytIframe = document.getElementById('panelVideoYoutube');
 
   panel.classList.remove('is-open');
   panel.setAttribute('aria-hidden', 'true');
   backdrop.classList.remove('is-visible');
-  audio.pause();
   video.pause();
+  if (ytIframe) ytIframe.removeAttribute('src');
+  if (ytWrap) ytWrap.hidden = true;
+  video.hidden = false;
   panelContinentId = null;
   cancelPanelTimeline();
 

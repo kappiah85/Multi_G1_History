@@ -6,7 +6,7 @@
 /** @typedef {{ when: string, title: string, text: string }} Highlight */
 /** @typedef {{ q: string, options: string[], correct: number }} QuizItem */
 
-/** @type {Array<{ id: string, label: string, overview: string, highlights: Highlight[], stats: [string, string][], images: {src: string, alt: string}[], audio: string, video: string, mediaNote: string, quiz: QuizItem[] }>} */
+/** @type {Array<{ id: string, label: string, overview: string, highlights: Highlight[], stats: [string, string][], images: {src: string, alt: string}[], video: string, youtubeId?: string, mediaNote: string, quiz: QuizItem[] }>} */
 export const CONTINENTS = [
   {
     id: 'africa',
@@ -58,14 +58,22 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Africa_satellite_plane.jpg/640px-Africa_satellite_plane.jpg',
-        alt: 'Satellite view of Africa',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/8/86/Africa_%28orthographic_projection%29.svg',
+        alt: 'Africa — orthographic political map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Africa_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'Africa — location in the world (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Africa_satellite_plane.jpg',
+        alt: 'Africa — satellite mosaic (NASA / Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/3/3f/En-Africa-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
+    video: '',
+    youtubeId: 'ucW4SP5Bu0k',
     mediaNote:
-      'Sample open media from Wikimedia Commons. For coursework, swap in your own narration MP3 and MP4 clips.',
+      'Region history video (YouTube). Order: Africa → Asia → Europe → Americas → Australia → Antarctica.',
     quiz: [
       {
         q: 'Which river was central to ancient Egyptian civilization?',
@@ -149,13 +157,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Europe_orthographic_Caucasus_Ukraine_boundary.svg/640px-Europe_orthographic_Caucasus_Ukraine_boundary.svg.png',
-        alt: 'Europe orthographic map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/c/c6/Europe_%28orthographic_projection%29.svg',
+        alt: 'Europe — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Europe_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'Europe — location in the world (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/a/a7/Blank_map_of_Europe_%28with_disputed_regions%29.svg',
+        alt: 'Europe — blank outline map with disputed regions (Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/8/8f/En-Europe-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'Replace sample audio/video with chapter-specific narration and clips about European history.',
+    video: '',
+    youtubeId: 'FGmLlNK0pPs',
+    mediaNote: 'Region history video (YouTube embed).',
     quiz: [
       {
         q: 'Which ancient polis is especially associated with early democratic experiments?',
@@ -229,13 +245,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Asia_%28orthographic_projection%29.svg/640px-Asia_%28orthographic_projection%29.svg.png',
-        alt: 'Asia orthographic map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/8/80/Asia_%28orthographic_projection%29.svg',
+        alt: 'Asia — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/f/fd/Asia_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'Asia — location in the world (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/4/49/LocationAsia.svg',
+        alt: 'Asia — regional location map (Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/e/e3/En-Asia-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'Use short MP4 segments per region (South Asia, East Asia, etc.) for deeper modules.',
+    video: '',
+    youtubeId: 'P3Nb48rjqxA',
+    mediaNote: 'Region history video (YouTube embed).',
     quiz: [
       {
         q: 'Which network historically connected Chang’an (Xi’an) to Central Asia and beyond?',
@@ -309,13 +333,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Location_North_America.svg/640px-Location_North_America.svg.png',
-        alt: 'North America location map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Northern_America_including_Mexico_%28orthographic_projection%29.svg',
+        alt: 'North America (incl. Mexico) — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/4/43/Location_North_America.svg',
+        alt: 'North America — location on world map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/d/d8/North_America_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'North America — highlighted on world map (Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/1/1a/En-North_America-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'MP3 narration keeps bandwidth lower than lossless audio; H.264/VP9 video balances quality and size.',
+    video: '',
+    youtubeId: '5Pm_s2wzxo0',
+    mediaNote: 'Region history video (YouTube embed).',
     quiz: [
       {
         q: 'Cahokia (near modern St. Louis) is especially known for:',
@@ -394,13 +426,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/South_America_%28orthographic_projection%29.svg/640px-South_America_%28orthographic_projection%29.svg.png',
-        alt: 'South America orthographic map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/South_America_%28orthographic_projection%29.svg',
+        alt: 'South America — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/2/28/South_America_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'South America — location in the world (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/5/54/South_America_-_Blue_Marble_orthographic.jpg',
+        alt: 'South America — Blue Marble satellite mosaic (NASA / Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/En-South_America-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'WebM/VP9 and AAC/MP3 are common web formats; compress media for faster loading on school networks.',
+    video: '',
+    youtubeId: 'KvoMLsiHrKQ',
+    mediaNote: 'Region history video (YouTube Shorts embed).',
     quiz: [
       {
         q: 'The Inca Empire was centered primarily in:',
@@ -474,13 +514,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Australia_with_AAT_%28orthographic_projection%29.svg/640px-Australia_with_AAT_%28orthographic_projection%29.svg.png',
-        alt: 'Australia orthographic map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/d/da/Australia_with_AAT_%28orthographic_projection%29.svg',
+        alt: 'Australia — orthographic map with Australian Antarctic Territory (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/8/8e/Oceania_%28orthographic_projection%29.svg',
+        alt: 'Oceania — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Australia_satellite_plane.jpg',
+        alt: 'Australia — satellite view (NASA Visible Earth / Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/9/9e/En-Australia-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'Prefer short clips (under 2 minutes) for in-page education; longer content can open externally.',
+    video: '',
+    youtubeId: '-3C4xy6VtTU',
+    mediaNote: 'Region history video (YouTube Shorts embed).',
     quiz: [
       {
         q: 'Australia’s six colonies federated into the Commonwealth in:',
@@ -559,13 +607,21 @@ export const CONTINENTS = [
     ],
     images: [
       {
-        src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Antarctica_%28orthographic_projection%29.svg/640px-Antarctica_%28orthographic_projection%29.svg.png',
-        alt: 'Antarctica orthographic map',
+        src: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Antarctica_%28orthographic_projection%29.svg',
+        alt: 'Antarctica — orthographic map (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Antarctica_in_the_world_%28red%29_%28W3%29.svg',
+        alt: 'Antarctica — location in the world (Wikimedia Commons)',
+      },
+      {
+        src: 'https://upload.wikimedia.org/wikipedia/commons/b/b7/Transantarctic_Mountains.jpg',
+        alt: 'Transantarctic Mountains — NASA photograph (Wikimedia Commons)',
       },
     ],
-    audio: 'https://upload.wikimedia.org/wikipedia/commons/6/6c/En-Antarctica-article.ogg',
-    video: 'https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4',
-    mediaNote: 'Antarctica media often uses high-resolution imagery; downscale for web to save bandwidth.',
+    video: '',
+    youtubeId: 'fvfAj-vCsxg',
+    mediaNote: 'Region history video (YouTube Shorts embed).',
     quiz: [
       {
         q: 'The Antarctic Treaty (1959) emphasizes primarily:',

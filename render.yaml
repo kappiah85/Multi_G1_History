@@ -1,0 +1,8 @@
+# Deploy on Render: New → Blueprint → connect this repo, or New → Static Site.
+# https://render.com/docs/static-sites
+services:
+  - type: web
+    name: multi-g1-history
+    runtime: static
+    buildCommand: echo "Static files — no build step"
+    staticPublishPath: .
