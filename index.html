@@ -67,8 +67,22 @@
       <h3 class="info-panel__subtitle">Timeline highlights</h3>
       <ul class="event-list" id="panelEvents"></ul>
 
-      <h3 class="info-panel__subtitle">Quick quiz</h3>
-      <div id="panelQuiz" class="panel-quiz"></div>
+      <h3 class="info-panel__subtitle">Timeline drawing</h3>
+      <p class="info-panel__timeline-lead">
+        Animated timeline for <strong>this region</strong>: vertical spine (DDA or Bresenham), midpoint circles at each event, and clipped quadratic Bézier chords—same raster pipeline as the Timeline page.
+      </p>
+      <div class="panel-timeline-toolbar">
+        <label class="panel-timeline-toolbar__label">
+          Line algorithm
+          <select id="panelTimelineLineMode" aria-label="Line algorithm for panel timeline">
+            <option value="dda">DDA</option>
+            <option value="bresenham">Bresenham</option>
+          </select>
+        </label>
+        <button type="button" id="panelTimelinePlay" class="btn btn--primary">Play timeline</button>
+      </div>
+      <canvas id="panelTimelineCanvas" width="300" height="420" class="panel-timeline-canvas" aria-label="Animated timeline for selected continent"></canvas>
+      <p id="panelTimelineStatus" class="timeline-status panel-timeline-status">Open a region from the globe, then press Play timeline.</p>
 
       <h3 class="info-panel__subtitle">Maps &amp; imagery</h3>
       <div class="media-row" id="panelImages"></div>

@@ -1,8 +1,38 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { initThemeSystem, isLightTheme } from './theme.js';
-import { CONTINENTS, latLonFromUV, continentFromLatLon } from './data.js';
-import { buildQuizForm } from './quiz.js';
+import { CONTINENTS, CONTINENT_TIMELINES, latLonFromUV, continentFromLatLon } from './data.js';
+import { runTimelineAnimation, clearTimelineCanvas } from './continentTimeline.js';
+
+let panelAnimToken = 0;
+let panelContinentId = null;
+
+function cancelPanelTimeline() {
+  panelAnimToken += 1;
+  const canvas = document.getElementById('panelTimelineCanvas');
+  if (canvas) clearTimelineCanvas(canvas);
+}
+
+function initPanelTimeline() {
+  const canvas = document.getElementById('panelTimelineCanvas');
+  const playBtn = document.getElementById('panelTimelinePlay');
+  const lineMode = document.getElementById('panelTimelineLineMode');
+  const statusEl = document.getElementById('panelTimelineStatus');
+  if (!canvas || !playBtn) return;
+
+  playBtn.addEventListener('click', async () => {
+    if (!panelContinentId) return;
+    const my = ++panelAnimToken;
+    const mode = lineMode?.value === 'bresenham' ? 'bresenham' : 'dda';
+    await runTimelineAnimation(canvas, {
+      continentId: panelContinentId,
+      mode,
+      getEvents: (id) => CONTINENT_TIMELINES[id] || [],
+      statusEl,
+      isCancelled: () => my !== panelAnimToken,
+    });
+  });
+}
 
 function findContinentData(id) {
   return CONTINENTS.find((c) => c.id === id) || null;
@@ -57,12 +87,11 @@ function openPanel(continentId) {
     }
   }
 
-  const quizEl = document.getElementById('panelQuiz');
-  if (quizEl) {
-    quizEl.innerHTML = '';
-    if (data.quiz?.length) {
-      quizEl.appendChild(buildQuizForm(data.quiz, `${data.id}-panel`));
-    }
+  panelContinentId = data.id;
+  cancelPanelTimeline();
+  const panelTlStatus = document.getElementById('panelTimelineStatus');
+  if (panelTlStatus) {
+    panelTlStatus.textContent = 'Press “Play timeline” to draw this region with DDA/Bresenham, circles, and Bézier chords.';
   }
 
   const imagesEl = document.getElementById('panelImages');
@@ -102,6 +131,8 @@ function closePanel() {
   backdrop.classList.remove('is-visible');
   audio.pause();
   video.pause();
+  panelContinentId = null;
+  cancelPanelTimeline();
 
   setTimeout(() => {
     if (!backdrop.classList.contains('is-visible')) backdrop.hidden = true;
@@ -296,5 +327,10 @@ function initGlobe() {
   return { applyGlobeTheme };
 }
 
+initPanelTimeline();
+
 const globeApi = initGlobe();
-initThemeSystem({ globeApplyTheme: globeApi?.applyGlobeTheme });
+initThemeSystem({
+  globeApplyTheme: globeApi?.applyGlobeTheme,
+  timelinePanelApi: { refreshClear: cancelPanelTimeline },
+});
