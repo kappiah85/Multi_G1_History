@@ -21,6 +21,10 @@
   --timeline-curve: #9bdc6a;
   --timeline-label: #e8eef8;
   --timeline-label-muted: #9aa8c4;
+  --map-ocean: #0a1018;
+  --map-border: #3d5a7a;
+  --map-hover: #3d9cf0;
+  --map-selected: #7ec8ff;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   color-scheme: dark;
 }
@@ -46,6 +50,10 @@
   --timeline-curve: #16a34a;
   --timeline-label: #0f172a;
   --timeline-label-muted: #64748b;
+  --map-ocean: #e2e8f0;
+  --map-border: #64748b;
+  --map-hover: #2563eb;
+  --map-selected: #0284c7;
   color-scheme: light;
 }
 
@@ -859,6 +867,179 @@ body {
   padding-top: 0.25rem;
 }
 
+.map-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 2rem;
+}
+
+.map-page__intro {
+  margin-bottom: 1rem;
+}
+
+.map-page__lead {
+  margin: 0 0 0.85rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 72ch;
+}
+
+.map-page__lead code {
+  font-size: 0.82em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.map-page__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.map-page__select-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.map-page__select-label select {
+  min-width: 10rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 0.85rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.map-page__narrate {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.map-page__status {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--accent);
+  min-height: 1.4em;
+}
+
+.map-workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+@media (min-width: 900px) {
+  .map-workspace {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .map-canvas-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .map-country-panel {
+    flex: 0 0 min(300px, 32vw);
+  }
+}
+
+.map-canvas-wrap {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--map-ocean);
+  box-shadow: 0 16px 40px var(--shadow);
+}
+
+.map-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.map-country-panel {
+  position: relative;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.15rem;
+  transition: opacity var(--transition), transform var(--transition), box-shadow var(--transition);
+  opacity: 0.92;
+  transform: translateX(6px);
+}
+
+.map-country-panel--open {
+  opacity: 1;
+  transform: translateX(0);
+  box-shadow: 0 12px 32px var(--shadow);
+}
+
+.map-country-panel__close {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+
+.map-country-panel__close:hover {
+  background: var(--btn-hover-bg);
+}
+
+.map-country-panel__title {
+  margin: 0 2rem 0.35rem 0;
+  font-size: 1.15rem;
+  color: var(--accent);
+  padding-right: 0.5rem;
+}
+
+.map-country-panel__hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.map-country-panel__facts {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.map-country-panel__facts li {
+  margin-bottom: 0.45rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -870,5 +1051,14 @@ body {
 
   .globe-container {
     transition: none;
+  }
+
+  .map-country-panel {
+    transition: none;
+    transform: none;
+  }
+
+  .map-country-panel--open {
+    transform: none;
   }
 }
