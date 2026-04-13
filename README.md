@@ -43,3 +43,15 @@ Use the **Live Server** extension (or similar), with the project root as the fol
 - **Network access** the first time (textures and Three.js load from CDNs)
 
 No `npm install` is required for the default setup.
+
+## Publish to GitHub (maintainers)
+
+If the remote repository does not exist yet, create an **empty** repo named `Multi_G1_History` under the GitHub account (no README/license/gitignore added by GitHub, or you will need to pull and merge first). Then from this project folder:
+
+```bash
+git remote add origin https://github.com/Totn11/Multi_G1_History.git
+git branch -M main
+git push -u origin main
+```
+
+Use **GitHub login** or a **personal access token** when Git asks for credentials. After the first successful push, the site is available on GitHub; for a public demo, enable **GitHub Pages** (Settings → Pages) and set the source to the `main` branch and `/ (root)`.
