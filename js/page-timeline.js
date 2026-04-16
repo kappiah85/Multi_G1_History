@@ -1,6 +1,9 @@
 import { initThemeSystem } from './theme.js';
+import { initMobileNav } from './mobile-nav.js';
 import { CONTINENTS, CONTINENT_TIMELINES } from './data.js';
 import { initContinentTimelinePanel } from './continentTimeline.js';
+
+initMobileNav();
 
 const continentSelect = document.getElementById('continentTimelineSelect');
 if (continentSelect) {

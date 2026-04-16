@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { initThemeSystem, isLightTheme } from './theme.js';
+import { initMobileNav } from './mobile-nav.js';
 import { CONTINENTS, CONTINENT_TIMELINES, latLonFromUV, continentFromLatLon } from './data.js';
 import { runTimelineAnimation, clearTimelineCanvas } from './continentTimeline.js';
 
@@ -126,6 +127,17 @@ function openPanel(continentId) {
 
   document.getElementById('panelMediaNote').textContent = data.mediaNote || '';
 
+  document.body.classList.remove('mobile-nav-open');
+  const navBackdrop = document.getElementById('mobileNavBackdrop');
+  if (navBackdrop) {
+    navBackdrop.hidden = true;
+    navBackdrop.classList.remove('is-visible');
+  }
+  document.body.style.overflow = '';
+
+  const narrow = window.matchMedia('(max-width: 768px)').matches;
+  video.preload = narrow ? 'none' : 'metadata';
+
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
   backdrop.hidden = false;
@@ -162,6 +174,9 @@ function initGlobe() {
   const container = document.getElementById('globe-container');
   if (!container) return null;
 
+  const mobileMq = window.matchMedia('(max-width: 768px)');
+  const tabletMq = window.matchMedia('(max-width: 1024px)');
+
   const scene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
@@ -172,6 +187,7 @@ function initGlobe() {
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.appendChild(renderer.domElement);
+  renderer.domElement.style.touchAction = 'none';
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -180,6 +196,7 @@ function initGlobe() {
   controls.maxDistance = 5;
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.35;
+  controls.enablePan = false;
 
   const ambient = new THREE.AmbientLight(0xffffff, 0.22);
   scene.add(ambient);
@@ -199,7 +216,8 @@ function initGlobe() {
     fill.intensity = lightMode ? 0.48 : baseLights.fill;
   }
 
-  const geometry = new THREE.SphereGeometry(EARTH_RADIUS, 96, 96);
+  const sphereSegs = () => (mobileMq.matches ? 56 : 96);
+  let geometry = new THREE.SphereGeometry(EARTH_RADIUS, sphereSegs(), sphereSegs());
   const loader = new THREE.TextureLoader();
   const earthMat = new THREE.MeshPhongMaterial({
     color: 0xffffff,
@@ -233,6 +251,35 @@ function initGlobe() {
   const earth = new THREE.Mesh(geometry, earthMat);
   scene.add(earth);
 
+  function applyViewportProfile() {
+    const mobile = mobileMq.matches;
+    const tablet = tabletMq.matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.5 : 2));
+    if (mobile) {
+      camera.position.set(0, 0.35, 3.05);
+      controls.minDistance = 1.42;
+      controls.maxDistance = 4.6;
+      controls.autoRotateSpeed = 0.22;
+    } else if (tablet) {
+      camera.position.set(0, 0.35, 2.92);
+      controls.minDistance = 1.38;
+      controls.maxDistance = 5;
+      controls.autoRotateSpeed = 0.3;
+    } else {
+      camera.position.set(0, 0.35, 2.8);
+      controls.minDistance = 1.35;
+      controls.maxDistance = 5;
+      controls.autoRotateSpeed = 0.35;
+    }
+    const nextSegs = sphereSegs();
+    if (geometry.parameters.widthSegments !== nextSegs) {
+      geometry.dispose();
+      geometry = new THREE.SphereGeometry(EARTH_RADIUS, nextSegs, nextSegs);
+      earth.geometry = geometry;
+    }
+    controls.update();
+  }
+
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
 
@@ -260,7 +307,9 @@ function initGlobe() {
     return latLonFromUV(hits[0].uv.x, hits[0].uv.y);
   }
 
+  /** Desktop hover only — touch drags would fight OrbitControls and cost work each move. */
   function onPointerMove(ev) {
+    if (ev.pointerType !== 'mouse') return;
     const ll = latLonFromEvent(ev.clientX, ev.clientY);
     if (!ll) {
       hoveredContinent = null;
@@ -271,7 +320,23 @@ function initGlobe() {
     updateHighlight();
   }
 
+  const TAP_PX = 14;
+  const TAP_MS = 450;
+  let tapProbe = null;
+
   function onPointerDown(ev) {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    tapProbe = { x: ev.clientX, y: ev.clientY, t: performance.now(), id: ev.pointerId };
+  }
+
+  function onPointerUp(ev) {
+    if (!tapProbe || tapProbe.id !== ev.pointerId) return;
+    const dx = ev.clientX - tapProbe.x;
+    const dy = ev.clientY - tapProbe.y;
+    const dt = performance.now() - tapProbe.t;
+    tapProbe = null;
+    if (Math.hypot(dx, dy) > TAP_PX || dt > TAP_MS) return;
+
     const ll = latLonFromEvent(ev.clientX, ev.clientY);
     if (!ll) return;
     const id = continentFromLatLon(ll.lat, ll.lon);
@@ -282,15 +347,30 @@ function initGlobe() {
     }
   }
 
+  function onPointerCancel() {
+    tapProbe = null;
+  }
+
   renderer.domElement.addEventListener('pointermove', onPointerMove);
   renderer.domElement.addEventListener('pointerdown', onPointerDown);
+  renderer.domElement.addEventListener('pointerup', onPointerUp);
+  renderer.domElement.addEventListener('pointercancel', onPointerCancel);
   renderer.domElement.style.cursor = 'grab';
 
-  const obs = new ResizeObserver(() => {
+  function syncRendererSize() {
     const { clientWidth, clientHeight } = container;
     camera.aspect = clientWidth / Math.max(clientHeight, 1);
     camera.updateProjectionMatrix();
     renderer.setSize(clientWidth, clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobileMq.matches ? 1.5 : 2));
+  }
+
+  applyViewportProfile();
+  mobileMq.addEventListener('change', applyViewportProfile);
+  tabletMq.addEventListener('change', applyViewportProfile);
+
+  const obs = new ResizeObserver(() => {
+    syncRendererSize();
   });
   obs.observe(container);
 
@@ -301,7 +381,7 @@ function initGlobe() {
   });
 
   document.getElementById('btnResetCamera')?.addEventListener('click', () => {
-    camera.position.set(0, 0.35, 2.8);
+    applyViewportProfile();
     controls.target.set(0, 0, 0);
     controls.update();
   });
@@ -343,6 +423,7 @@ function initGlobe() {
 }
 
 initPanelTimeline();
+initMobileNav();
 
 const globeApi = initGlobe();
 initThemeSystem({

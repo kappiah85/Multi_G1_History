@@ -1,6 +1,6 @@
 # Multi G1 — World History Explorer
 
-Interactive **3D globe** (Three.js), separate pages for **quiz**, **continent timeline** (raster algorithms), and **Canvas 2D** demos. Dark/light theme is stored in the browser.
+Interactive **3D globe** (Three.js), separate pages for **quiz**, **continent timeline** (raster algorithms), and a **satellite-style 2D map**. Dark/light theme is stored in the browser.
 
 ## How to run locally
 
@@ -35,7 +35,7 @@ Use the **Live Server** extension (or similar), with the project root as the fol
 | `index.html` | Globe + continent detail panel |
 | `quiz.html` | World history quiz |
 | `timeline.html` | Animated continent timeline (DDA / Bresenham, etc.) |
-| `algorithms.html` | 2D line / circle / Bézier / clipping demo |
+| `map.html` | Satellite-style world map with selectable borders |
 
 ## Requirements
 

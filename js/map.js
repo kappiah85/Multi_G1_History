@@ -28,6 +28,12 @@
 
 import { collectBresenhamSteps, collectDDASteps } from './algorithms.js';
 
+/** Equirectangular Earth imagery (same projection as lon/lat → x,y). CORS-friendly mirrors. */
+const SATELLITE_URLS = [
+  'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/textures/planets/earth_atmos_2048.jpg',
+  'https://threejs.org/examples/textures/planets/earth_atmos_2048.jpg',
+];
+
 const GEOJSON_URLS = [
   'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v4.1.0/geojson/ne_110m_admin_0_countries.geojson',
   'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_0_countries.geojson',
@@ -54,9 +60,9 @@ function readMapPalette() {
   };
   return {
     ocean: parseRgb(g('--map-ocean', '#0a1018')),
-    border: parseRgb(g('--map-border', '#3d5a7a')),
-    hover: parseRgb(g('--map-hover', '#3d9cf0')),
-    selected: parseRgb(g('--map-selected', '#7ec8ff')),
+    border: parseRgb(g('--map-border', '#e8f4ff')),
+    hover: parseRgb(g('--map-hover', '#7ec8ff')),
+    selected: parseRgb(g('--map-selected', '#ffd080')),
   };
 }
 
@@ -197,18 +203,76 @@ function rasterizePartsOutline(imageData, w, h, parts, rgb, mode) {
   }
 }
 
-function buildBaseImageData(features, w, h, mode) {
-  const pal = readMapPalette();
-  const data = new ImageData(w, h);
-  const oceanR = pal.ocean[0];
-  const oceanG = pal.ocean[1];
-  const oceanB = pal.ocean[2];
-  for (let i = 0; i < data.data.length; i += 4) {
-    data.data[i] = oceanR;
-    data.data[i + 1] = oceanG;
-    data.data[i + 2] = oceanB;
-    data.data[i + 3] = 255;
+let cachedSatelliteImg = /** @type {HTMLImageElement | null | undefined} */ (undefined);
+
+function loadImageCors(url) {
+  return new Promise((resolve) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => resolve(im);
+    im.onerror = () => resolve(null);
+    im.src = url;
+  });
+}
+
+/** First successful load is cached; `null` if all URLs fail (ocean fallback). */
+async function getSatelliteImage() {
+  if (cachedSatelliteImg !== undefined) return cachedSatelliteImg;
+  for (const url of SATELLITE_URLS) {
+    const im = await loadImageCors(url);
+    if (im) {
+      cachedSatelliteImg = im;
+      return im;
+    }
   }
+  cachedSatelliteImg = null;
+  return null;
+}
+
+async function buildBaseImageData(features, w, h, mode) {
+  const pal = readMapPalette();
+  const tmp = document.createElement('canvas');
+  tmp.width = w;
+  tmp.height = h;
+  const tctx = tmp.getContext('2d', { willReadFrequently: true });
+  if (!tctx) {
+    const data = new ImageData(w, h);
+    for (let i = 0; i < data.data.length; i += 4) {
+      data.data[i] = pal.ocean[0];
+      data.data[i + 1] = pal.ocean[1];
+      data.data[i + 2] = pal.ocean[2];
+      data.data[i + 3] = 255;
+    }
+    for (const f of features) rasterizePartsOutline(data, w, h, f.parts, pal.border, mode);
+    return data;
+  }
+
+  const sat = await getSatelliteImage();
+  if (sat) {
+    try {
+      tctx.drawImage(sat, 0, 0, w, h);
+    } catch {
+      tctx.fillStyle = `rgb(${pal.ocean[0]},${pal.ocean[1]},${pal.ocean[2]})`;
+      tctx.fillRect(0, 0, w, h);
+    }
+  } else {
+    tctx.fillStyle = `rgb(${pal.ocean[0]},${pal.ocean[1]},${pal.ocean[2]})`;
+    tctx.fillRect(0, 0, w, h);
+  }
+
+  let data;
+  try {
+    data = tctx.getImageData(0, 0, w, h);
+  } catch {
+    data = new ImageData(w, h);
+    for (let i = 0; i < data.data.length; i += 4) {
+      data.data[i] = pal.ocean[0];
+      data.data[i + 1] = pal.ocean[1];
+      data.data[i + 2] = pal.ocean[2];
+      data.data[i + 3] = 255;
+    }
+  }
+
   for (const f of features) {
     rasterizePartsOutline(data, w, h, f.parts, pal.border, mode);
   }
@@ -299,9 +363,10 @@ export function initWorldMap(canvas, opts) {
     if (selectedIndex >= 0) {
       const elapsed = performance.now() - selectionAnimStart;
       let t = 1;
+      const animMs = window.matchMedia('(max-width: 768px)').matches ? 240 : 420;
       if (selectionAnimActive) {
-        t = easeOutCubic(Math.min(1, elapsed / 420));
-        if (elapsed >= 420) selectionAnimActive = false;
+        t = easeOutCubic(Math.min(1, elapsed / animMs));
+        if (elapsed >= animMs) selectionAnimActive = false;
       }
       const blend = 0.45 + 0.55 * t;
       const sr = Math.round(pal.selected[0] * blend + pal.border[0] * (1 - blend));
@@ -322,16 +387,23 @@ export function initWorldMap(canvas, opts) {
     rafId = requestAnimationFrame(renderFrame);
   }
 
-  function rebuildBaseLayer() {
+  async function rebuildBaseLayer() {
     mode = getLineMode();
     if (!features.length) return;
-    setStatus(`Drawing borders (${mode.toUpperCase()} line rasterization)…`);
-    baseImageData = buildBaseImageData(features, W, H, mode);
-    setStatus(`${features.length} countries · ${mode.toUpperCase()} edges · hover / click`);
+    setStatus('Loading satellite imagery…');
+    try {
+      baseImageData = await buildBaseImageData(features, W, H, mode);
+      setStatus(
+        `${features.length} countries · satellite base · ${mode.toUpperCase()} borders · hover / tap`
+      );
+    } catch {
+      setStatus('Could not build map layer.');
+    }
     scheduleDraw();
   }
 
   function onMove(ev) {
+    if (ev.pointerType !== 'mouse') return;
     const { x, y } = canvasToInternal(canvas, ev.clientX, ev.clientY);
     const idx = pickFeatureIndex(x, y);
     if (idx !== hoverIndex) {
@@ -374,7 +446,7 @@ export function initWorldMap(canvas, opts) {
   canvas.addEventListener('pointerdown', onClick);
   canvas.addEventListener('pointerleave', onLeave);
 
-  lineModeSelect?.addEventListener('change', () => rebuildBaseLayer());
+  lineModeSelect?.addEventListener('change', () => void rebuildBaseLayer());
 
   async function loadGeoJson() {
     setStatus('Loading country GeoJSON…');
@@ -417,7 +489,7 @@ export function initWorldMap(canvas, opts) {
     }
     list.sort((a, b) => a.area - b.area);
     features = list;
-    rebuildBaseLayer();
+    void rebuildBaseLayer();
   }
 
   loadGeoJson();
@@ -425,7 +497,7 @@ export function initWorldMap(canvas, opts) {
   return {
     rebuildBaseLayer,
     redrawTheme() {
-      rebuildBaseLayer();
+      void rebuildBaseLayer();
     },
     destroy() {
       cancelAnimationFrame(rafId);

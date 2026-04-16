@@ -46,6 +46,7 @@ export function initMapUi() {
     if (panel) {
       panel.hidden = false;
       panel.classList.add('map-country-panel--open');
+      document.body.classList.add('map-panel-open');
     }
 
     speakLine(getNarrationLine(adm0, adminName));
@@ -55,6 +56,7 @@ export function initMapUi() {
     if (panel) {
       panel.classList.remove('map-country-panel--open');
       panel.hidden = true;
+      document.body.classList.remove('map-panel-open');
     }
     if (factsEl) factsEl.innerHTML = '';
     if (titleEl) titleEl.textContent = '';

@@ -7,40 +7,57 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand">
-      <a href="index.html" class="brand__link">
-        <span class="brand__icon" aria-hidden="true">◉</span>
-        <div>
-          <h1 class="brand__title">World History Explorer</h1>
-          <p class="tagline">Continent timeline (algorithms)</p>
+  <div class="site-chrome">
+    <header class="app-header">
+      <div class="app-header__bar">
+        <div class="brand">
+          <a href="index.html" class="brand__link">
+            <span class="brand__icon" aria-hidden="true">◉</span>
+            <div>
+              <h1 class="brand__title">World History Explorer</h1>
+              <p class="tagline">Continent timeline</p>
+            </div>
+          </a>
         </div>
-      </a>
-    </div>
-    <nav class="toolbar" aria-label="Page tools">
-      <a href="index.html" class="btn">Globe</a>
-      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
-    </nav>
-    <p class="theme-hint" id="themeColorHint">
-      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
-      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
-    </p>
-  </header>
+        <button
+          type="button"
+          class="mobile-nav-toggle"
+          id="btnMobileNavToggle"
+          aria-expanded="false"
+          aria-controls="siteMainNav"
+          aria-label="Open site menu"
+        >
+          <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
+        </button>
+      </div>
+      <p class="theme-hint" id="themeColorHint">
+        <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+        triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+      </p>
+    </header>
 
-  <nav class="section-nav" aria-label="Site pages">
-    <span class="section-nav__label">Pages</span>
-    <ul class="section-nav__list">
-      <li><a href="index.html" class="section-nav__link">Globe</a></li>
-      <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
-      <li><a href="timeline.html" class="section-nav__link is-active" aria-current="page">Timeline</a></li>
-      <li><a href="algorithms.html" class="section-nav__link">Algorithms</a></li>
-      <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
-    </ul>
-  </nav>
+    <div id="siteMainNav" class="site-main-nav">
+      <nav class="toolbar" aria-label="Page tools">
+        <a href="index.html" class="btn">Globe</a>
+        <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+      </nav>
+      <nav class="section-nav" aria-label="Site pages">
+        <span class="section-nav__label">Pages</span>
+        <ul class="section-nav__list">
+          <li><a href="index.html" class="section-nav__link">Globe</a></li>
+          <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
+          <li><a href="timeline.html" class="section-nav__link is-active" aria-current="page">Timeline</a></li>
+          <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
   <main class="layout layout--subpage">
     <aside id="section-timeline" class="continent-timeline-aside timeline-page__panel" aria-labelledby="timeline-heading">
-      <h2 id="timeline-heading">Continent timeline (algorithms)</h2>
+      <h2 id="timeline-heading">Continent timeline</h2>
       <p class="aside-lead">
         Each region has its own vertical story. The spine is rasterized with <strong>DDA</strong> or <strong>Bresenham</strong> (your choice);
         events use the <strong>midpoint circle</strong>; smooth links are <strong>quadratic Bézier</strong> chords, each drawn as a line algorithm.

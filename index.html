@@ -7,39 +7,56 @@
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header class="app-header">
-    <div class="brand">
-      <span class="brand__icon" aria-hidden="true">◉</span>
-      <div>
-        <h1>World History Explorer</h1>
-        <p class="tagline">Interactive 3D Earth · History · Multimedia</p>
+  <div class="site-chrome">
+    <header class="app-header">
+      <div class="app-header__bar">
+        <div class="brand">
+          <span class="brand__icon" aria-hidden="true">◉</span>
+          <div>
+            <h1>World History Explorer</h1>
+            <p class="tagline">Interactive 3D Earth · History · Multimedia</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          class="mobile-nav-toggle"
+          id="btnMobileNavToggle"
+          aria-expanded="false"
+          aria-controls="siteMainNav"
+          aria-label="Open site menu"
+        >
+          <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
+        </button>
       </div>
-    </div>
-    <nav class="toolbar" aria-label="Globe controls">
-      <button type="button" id="btnToggleRotation" class="btn btn--primary" aria-pressed="true">
-        Pause rotation
-      </button>
-      <button type="button" id="btnResetCamera" class="btn">Reset view</button>
-      <button type="button" id="btnToggleWireframe" class="btn" aria-pressed="false">Wireframe</button>
-      <a href="map.html" class="btn">Explore Map</a>
-      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
-    </nav>
-    <p class="theme-hint" id="themeColorHint">
-      <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
-      triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
-    </p>
-  </header>
+      <p class="theme-hint" id="themeColorHint">
+        <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
+        triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
+      </p>
+    </header>
 
-  <nav class="section-nav" aria-label="Site pages">
-    <span class="section-nav__label">Pages</span>
-    <ul class="section-nav__list">
-      <li><a href="index.html" class="section-nav__link is-active" aria-current="page">Globe</a></li>
-      <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
-      <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
-      <li><a href="algorithms.html" class="section-nav__link">Algorithms</a></li>
-      <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
-    </ul>
-  </nav>
+    <div id="siteMainNav" class="site-main-nav">
+      <nav class="toolbar" aria-label="Globe controls">
+        <button type="button" id="btnToggleRotation" class="btn btn--primary" aria-pressed="true">
+          Pause rotation
+        </button>
+        <button type="button" id="btnResetCamera" class="btn">Reset view</button>
+        <button type="button" id="btnToggleWireframe" class="btn" aria-pressed="false">Wireframe</button>
+        <a href="map.html" class="btn">Explore Map</a>
+        <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
+      </nav>
+      <nav class="section-nav" aria-label="Site pages">
+        <span class="section-nav__label">Pages</span>
+        <ul class="section-nav__list">
+          <li><a href="index.html" class="section-nav__link is-active" aria-current="page">Globe</a></li>
+          <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
+          <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
+          <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
   <main class="layout layout--globe-page">
     <div class="layout-main-row">
@@ -47,7 +64,7 @@
         <section id="section-globe" class="globe-section" aria-labelledby="globe-heading">
           <h2 id="globe-heading" class="section-heading">Interactive globe</h2>
           <div id="globe-container" class="globe-container" role="application" aria-label="Rotatable 3D globe. Click a continent to learn more."></div>
-          <p class="hint">Drag to rotate · Scroll to zoom · Click land regions to open history panels</p>
+          <p class="hint">Drag to rotate · Scroll or pinch to zoom · Tap land regions to open history panels</p>
           <aside class="continent-nav" aria-label="Continent shortcuts">
             <span class="continent-nav__label">Jump to:</span>
             <div class="continent-nav__buttons" id="continentQuickNav"></div>

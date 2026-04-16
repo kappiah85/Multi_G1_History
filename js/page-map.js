@@ -1,6 +1,9 @@
 import { initThemeSystem } from './theme.js';
+import { initMobileNav } from './mobile-nav.js';
 import { initMapUi } from './ui-controls.js';
 import { initWorldMap } from './map.js';
+
+initMobileNav();
 
 const canvas = document.getElementById('worldMapCanvas');
 const ui = initMapUi();
