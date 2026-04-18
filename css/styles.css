@@ -896,6 +896,37 @@ body.map-panel-open {
   color: var(--accent);
 }
 
+.quiz-form--sequential .quiz-step-progress {
+  margin: 0 0 0.65rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.quiz-step-feedback {
+  margin: 0.5rem 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  min-height: 1.35em;
+}
+
+.quiz-step-feedback.is-correct {
+  color: #9bdc6a;
+}
+
+.quiz-step-feedback.is-incorrect {
+  color: #ff9a9a;
+}
+
+.quiz-step-feedback.is-neutral {
+  color: var(--accent);
+}
+
+.quiz-actions--sequential {
+  margin-top: 0.65rem;
+}
+
 .quiz-hub {
   margin-top: 1.25rem;
   padding: 1rem 1.1rem 1.15rem;

@@ -1,6 +1,8 @@
 /**
- * Shared quiz UI: radio groups, scoring, and feedback for panel + world quiz hub.
+ * Quiz UI: one question at a time, immediate feedback, optional reveal, sound via multimedia.js.
  */
+
+import { playQuizAnswerSound } from './multimedia.js';
 
 function shuffleInPlace(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
@@ -11,24 +13,157 @@ function shuffleInPlace(arr) {
 }
 
 /**
+ * Build a step-by-step quiz: one MCQ visible; correct → confirm + sound + next; wrong → retry and/or show answer.
+ *
  * @param {{ q: string, options: string[], correct: number }[]} questions
  * @param {string} namePrefix unique per render (e.g. continent id + 'panel')
  */
 export function buildQuizForm(questions, namePrefix) {
   const wrap = document.createElement('div');
-  wrap.className = 'quiz-form';
+  wrap.className = 'quiz-form quiz-form--sequential';
 
-  questions.forEach((item, qi) => {
+  const progress = document.createElement('p');
+  progress.className = 'quiz-step-progress';
+  progress.setAttribute('aria-live', 'polite');
+
+  const card = document.createElement('div');
+  card.className = 'quiz-step-card';
+
+  const feedback = document.createElement('p');
+  feedback.className = 'quiz-step-feedback';
+  feedback.setAttribute('role', 'status');
+  feedback.hidden = true;
+
+  const actionsRow = document.createElement('div');
+  actionsRow.className = 'quiz-actions quiz-actions--sequential';
+
+  const revealBtn = document.createElement('button');
+  revealBtn.type = 'button';
+  revealBtn.className = 'btn';
+  revealBtn.textContent = 'Show answer';
+  revealBtn.hidden = true;
+
+  const nextAfterRevealBtn = document.createElement('button');
+  nextAfterRevealBtn.type = 'button';
+  nextAfterRevealBtn.className = 'btn btn--primary';
+  nextAfterRevealBtn.textContent = 'Next question';
+  nextAfterRevealBtn.hidden = true;
+
+  const reset = document.createElement('button');
+  reset.type = 'button';
+  reset.className = 'btn';
+  reset.textContent = 'Start over';
+
+  const summary = document.createElement('p');
+  summary.className = 'quiz-result';
+  summary.setAttribute('role', 'status');
+  summary.hidden = true;
+
+  wrap.appendChild(progress);
+  wrap.appendChild(card);
+  wrap.appendChild(feedback);
+  wrap.appendChild(actionsRow);
+  actionsRow.appendChild(revealBtn);
+  actionsRow.appendChild(nextAfterRevealBtn);
+  actionsRow.appendChild(reset);
+
+  wrap.appendChild(summary);
+
+  let index = 0;
+  let correctCount = 0;
+  /** Block new picks while auto-advancing after correct, or after reveal until Next. */
+  let locked = false;
+  let revealed = false;
+  let advanceTimer = /** @type {ReturnType<typeof setTimeout> | null} */ (null);
+
+  function clearAdvanceTimer() {
+    if (advanceTimer) {
+      clearTimeout(advanceTimer);
+      advanceTimer = null;
+    }
+  }
+
+  function setFeedback(text, variant) {
+    feedback.hidden = false;
+    feedback.textContent = text;
+    feedback.classList.remove('is-correct', 'is-incorrect', 'is-neutral');
+    if (variant === 'correct') feedback.classList.add('is-correct');
+    else if (variant === 'incorrect') feedback.classList.add('is-incorrect');
+    else feedback.classList.add('is-neutral');
+  }
+
+  function clearRadiosInCard() {
+    card.querySelectorAll('input[type="radio"]').forEach((r) => {
+      r.checked = false;
+    });
+    card.querySelectorAll('.quiz-opt').forEach((lab) => {
+      lab.classList.remove('quiz-opt--correct', 'quiz-opt--wrong');
+    });
+  }
+
+  function disableRadiosInCard(disable) {
+    card.querySelectorAll('input[type="radio"]').forEach((r) => {
+      r.disabled = disable;
+    });
+  }
+
+  function showSummary() {
+    clearAdvanceTimer();
+    progress.textContent = 'Quiz complete';
+    card.innerHTML = '';
+    revealBtn.hidden = true;
+    nextAfterRevealBtn.hidden = true;
+    locked = true;
+    summary.hidden = false;
+    summary.textContent = `Score: ${correctCount} / ${questions.length} correct.`;
+  }
+
+  function goNext() {
+    clearAdvanceTimer();
+    revealed = false;
+    locked = false;
+    revealBtn.hidden = true;
+    nextAfterRevealBtn.hidden = true;
+    feedback.hidden = true;
+    feedback.textContent = '';
+    feedback.classList.remove('is-correct', 'is-incorrect', 'is-neutral');
+
+    index += 1;
+    if (index >= questions.length) {
+      showSummary();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function renderQuestion() {
+    clearAdvanceTimer();
+    clearRadiosInCard();
+    locked = false;
+    revealed = false;
+    revealBtn.hidden = true;
+    nextAfterRevealBtn.hidden = true;
+    feedback.hidden = true;
+    feedback.textContent = '';
+    feedback.classList.remove('is-correct', 'is-incorrect', 'is-neutral');
+    summary.hidden = true;
+    disableRadiosInCard(false);
+
+    const item = questions[index];
+    progress.textContent = `Question ${index + 1} of ${questions.length}`;
+
+    card.innerHTML = '';
     const fieldset = document.createElement('fieldset');
     fieldset.className = 'quiz-q';
     const leg = document.createElement('legend');
     leg.className = 'quiz-q__legend';
-    leg.textContent = `${qi + 1}. ${item.q}`;
+    leg.textContent = item.q;
     fieldset.appendChild(leg);
 
     const opts = document.createElement('div');
     opts.className = 'quiz-q__opts';
-    const groupName = `${namePrefix}-q${qi}`;
+    const groupName = `${namePrefix}-q${index}`;
+
     item.options.forEach((label, oi) => {
       const id = `${groupName}-o${oi}`;
       const row = document.createElement('label');
@@ -39,74 +174,74 @@ export function buildQuizForm(questions, namePrefix) {
       input.name = groupName;
       input.value = String(oi);
       input.id = id;
+
+      input.addEventListener('change', () => {
+        if (locked) return;
+        const selected = parseInt(input.value, 10);
+
+        if (selected === item.correct) {
+          // Correct: sound + short praise, then advance (no next until resolved).
+          playQuizAnswerSound(true);
+          setFeedback('Correct! ✅', 'correct');
+          correctCount += 1;
+          locked = true;
+          disableRadiosInCard(true);
+          revealBtn.hidden = true;
+          clearAdvanceTimer();
+          advanceTimer = setTimeout(() => {
+            advanceTimer = null;
+            goNext();
+          }, 850);
+        } else {
+          // Incorrect: sound + retry; stay on this question until correct or reveal → Next.
+          playQuizAnswerSound(false);
+          setFeedback('Incorrect ❌ Try again.', 'incorrect');
+          revealBtn.hidden = false;
+          queueMicrotask(() => clearRadiosInCard());
+        }
+      });
+
       const span = document.createElement('span');
       span.textContent = label;
       row.appendChild(input);
       row.appendChild(span);
       opts.appendChild(row);
     });
+
     fieldset.appendChild(opts);
-    wrap.appendChild(fieldset);
+    card.appendChild(fieldset);
+  }
+
+  revealBtn.addEventListener('click', () => {
+    const item = questions[index];
+    revealed = true;
+    setFeedback(`The correct answer is: ${item.options[item.correct]}`, 'neutral');
+    card.querySelectorAll('.quiz-opt').forEach((lab, labIdx) => {
+      lab.classList.remove('quiz-opt--correct', 'quiz-opt--wrong');
+      if (labIdx === item.correct) lab.classList.add('quiz-opt--correct');
+    });
+    disableRadiosInCard(true);
+    revealBtn.hidden = true;
+    nextAfterRevealBtn.hidden = false;
+    locked = true;
   });
 
-  const actions = document.createElement('div');
-  actions.className = 'quiz-actions';
-  const check = document.createElement('button');
-  check.type = 'button';
-  check.className = 'btn btn--primary';
-  check.textContent = 'Check answers';
-  const reset = document.createElement('button');
-  reset.type = 'button';
-  reset.className = 'btn';
-  reset.textContent = 'Reset';
-  actions.appendChild(check);
-  actions.appendChild(reset);
-  wrap.appendChild(actions);
-
-  const result = document.createElement('p');
-  result.className = 'quiz-result';
-  result.setAttribute('role', 'status');
-  result.hidden = true;
-  wrap.appendChild(result);
-
-  check.addEventListener('click', () => {
-    let correct = 0;
-    questions.forEach((item, qi) => {
-      const groupName = `${namePrefix}-q${qi}`;
-      const picked = wrap.querySelector(`input[name="${groupName}"]:checked`);
-      const fieldset = wrap.querySelectorAll('fieldset.quiz-q')[qi];
-      fieldset?.querySelectorAll('.quiz-opt').forEach((lab, oi) => {
-        lab.classList.remove('quiz-opt--correct', 'quiz-opt--wrong', 'quiz-opt--missed');
-        if (oi === item.correct) lab.classList.add('quiz-opt--correct');
-      });
-      if (picked) {
-        const idx = parseInt(picked.value, 10);
-        if (idx === item.correct) {
-          correct += 1;
-        } else {
-          const wrongLab = fieldset?.querySelector(`label[for="${groupName}-o${idx}"]`);
-          wrongLab?.classList.add('quiz-opt--wrong');
-        }
-      } else {
-        fieldset?.classList.add('quiz-q--skipped');
-      }
-    });
-    result.hidden = false;
-    result.textContent = `Score: ${correct} / ${questions.length} correct.`;
+  nextAfterRevealBtn.addEventListener('click', () => {
+    if (!revealed) return;
+    goNext();
   });
 
   reset.addEventListener('click', () => {
-    wrap.querySelectorAll('input[type="radio"]').forEach((i) => {
-      i.checked = false;
-    });
-    wrap.querySelectorAll('.quiz-opt').forEach((lab) => {
-      lab.classList.remove('quiz-opt--correct', 'quiz-opt--wrong', 'quiz-opt--missed');
-    });
-    wrap.querySelectorAll('fieldset.quiz-q').forEach((fs) => fs.classList.remove('quiz-q--skipped'));
-    result.hidden = true;
-    result.textContent = '';
+    clearAdvanceTimer();
+    index = 0;
+    correctCount = 0;
+    locked = false;
+    revealed = false;
+    summary.hidden = true;
+    renderQuestion();
   });
 
+  renderQuestion();
   return wrap;
 }
 

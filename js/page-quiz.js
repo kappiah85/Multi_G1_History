@@ -1,5 +1,7 @@
 import { initThemeSystem } from './theme.js';
 import { initMobileNav } from './mobile-nav.js';
+import { preloadQuizSounds } from './multimedia.js';
+import { initQuizSoundToggle } from './ui-controls.js';
 import { CONTINENTS, getQuizPool } from './data.js';
 import { buildQuizForm, pickRandomQuestions } from './quiz.js';
 
@@ -36,5 +38,7 @@ function initWorldQuizHub() {
 }
 
 initMobileNav();
+preloadQuizSounds();
+initQuizSoundToggle(document.getElementById('btnQuizSoundToggle'));
 initWorldQuizHub();
 initThemeSystem({});

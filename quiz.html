@@ -59,8 +59,7 @@
     <section id="section-quiz" class="quiz-hub" aria-labelledby="quiz-hub-heading">
       <h2 id="quiz-hub-heading" class="quiz-hub__title">World history quiz</h2>
       <p class="quiz-hub__intro">
-        Test yourself on events tied to each continent. Pick a focus or mix everything, then check your answers—
-        great revision after exploring the globe.
+        One question at a time: pick an answer for instant feedback. Get it wrong? Try again or use <strong>Show answer</strong>, then continue when you are ready.
       </p>
       <div class="quiz-hub__controls">
         <label class="quiz-hub__select-label">
@@ -69,6 +68,15 @@
             <option value="">All continents (mixed)</option>
           </select>
         </label>
+        <button
+          type="button"
+          id="btnQuizSoundToggle"
+          class="btn"
+          aria-pressed="true"
+          aria-label="Turn quiz sound effects off"
+        >
+          Sound on
+        </button>
         <button type="button" id="worldQuizStart" class="btn btn--primary">Start 5 questions</button>
       </div>
       <div id="worldQuizArea" class="quiz-hub__area" hidden></div>

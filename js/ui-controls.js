@@ -1,9 +1,12 @@
 /**
  * Map page UI: country detail panel, load status, optional narration toggle.
  * Keeps DOM updates separate from map rendering (map.js).
+ *
+ * Quiz page: sound on/off toggle (preference in localStorage via multimedia.js).
  */
 
 import { getFactsForCountry, getNarrationLine } from './mapCountryFacts.js';
+import { getQuizSoundsEnabled, setQuizSoundsEnabled } from './multimedia.js';
 
 /** Wire the side panel and status line for the 2D world map page. */
 export function initMapUi() {
@@ -80,4 +83,22 @@ export function initMapUi() {
     shouldSpeak,
     speakLine,
   };
+}
+
+/** Wire quiz “Sound on / Sound off” control (quiz.html). */
+export function initQuizSoundToggle(button) {
+  if (!button) return;
+
+  function sync() {
+    const on = getQuizSoundsEnabled();
+    button.setAttribute('aria-pressed', String(on));
+    button.textContent = on ? 'Sound on' : 'Sound off';
+    button.setAttribute('aria-label', on ? 'Turn quiz sound effects off' : 'Turn quiz sound effects on');
+  }
+
+  sync();
+  button.addEventListener('click', () => {
+    setQuizSoundsEnabled(!getQuizSoundsEnabled());
+    sync();
+  });
 }
