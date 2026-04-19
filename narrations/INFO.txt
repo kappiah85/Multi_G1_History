@@ -1,0 +1,11 @@
+Place pre-recorded continent narration MP3 files here (same origin as the site):
+
+  africa.mp3
+  europe.mp3
+  asia.mp3
+  north_america.mp3
+  south_america.mp3
+  australia.mp3
+  antarctica.mp3
+
+If a file is missing or fails to load, the globe panel falls back to browser text-to-speech.

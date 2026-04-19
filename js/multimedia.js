@@ -1,6 +1,7 @@
 /**
- * Quiz sound feedback: preload short WAV clips (generated in-memory) and play via HTML5 Audio.
- * No external asset files — avoids CORS/hosting issues while keeping latency low.
+ * Multimedia helpers:
+ * - Quiz: short WAV clips via HTML5 Audio (preload).
+ * - Continent panel: optional `narrations/*.mp3` human voice, else Web Speech fallback (no overlap).
  */
 
 const STORAGE_KEY = 'whe-quiz-sounds-enabled';
@@ -144,4 +145,283 @@ export function playQuizAnswerSound(isCorrect) {
   clip.play().catch(() => {
     /* Autoplay policy or missing decode — ignore */
   });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Continent info panel — pre-recorded MP3 in /narrations/ + TTS fallback       */
+/* -------------------------------------------------------------------------- */
+
+const NARRATOR_AUTO_KEY = 'whe-continent-narrator-auto';
+
+/** Relative to site root (served beside index.html). */
+const NARRATION_FOLDER = 'narrations';
+
+/** Map app continent `id` → MP3 filename stem (see /narrations/INFO.txt). */
+const NARRATION_STEM_BY_CONTINENT_ID = {
+  africa: 'africa',
+  europe: 'europe',
+  asia: 'asia',
+  northAmerica: 'north_america',
+  southAmerica: 'south_america',
+  australia: 'australia',
+  antarctica: 'antarctica',
+};
+
+/** @typedef {{ id?: string, label: string, overview: string, stats?: [string, string][], highlights?: { when: string, title: string, text: string }[] }} ContinentNarrationShape */
+
+export function getContinentNarratorAuto() {
+  return localStorage.getItem(NARRATOR_AUTO_KEY) === '1';
+}
+
+export function setContinentNarratorAuto(on) {
+  localStorage.setItem(NARRATOR_AUTO_KEY, on ? '1' : '0');
+}
+
+/** @type {((phase: 'idle' | 'speaking' | 'paused') => void) | null} */
+let continentNarrationUiCallback = null;
+
+/** Lets the globe panel sync Play / Pause button states. */
+export function setContinentNarrationUiCallback(fn) {
+  continentNarrationUiCallback = fn;
+}
+
+function notifyContinentNarration(phase) {
+  continentNarrationUiCallback?.(phase);
+}
+
+/** Reusable HTML5 element for continent MP3s (only one clip at a time). */
+let continentNarrationAudioEl = /** @type {HTMLAudioElement | null} */ (null);
+/** True while the current clip is expected to be file-based (not TTS). */
+let continentNarrationUsingFile = false;
+
+function ensureContinentNarrationAudio() {
+  if (!continentNarrationAudioEl) {
+    continentNarrationAudioEl = new Audio();
+    continentNarrationAudioEl.preload = 'auto';
+    continentNarrationAudioEl.volume = 1;
+  }
+  return continentNarrationAudioEl;
+}
+
+/** Stops MP3 playback and clears the element (no notify). */
+function stopContinentNarrationFile() {
+  continentNarrationUsingFile = false;
+  const el = continentNarrationAudioEl;
+  if (!el) return;
+  el.onended = null;
+  el.onerror = null;
+  el.onplay = null;
+  el.onpause = null;
+  el.pause();
+  el.currentTime = 0;
+  el.removeAttribute('src');
+  try {
+    el.load();
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Build a concise script for TTS fallback (educational, not the full long page). */
+export function buildContinentNarrationText(/** @type {ContinentNarrationShape} */ data) {
+  if (!data) return '';
+  const chunks = [];
+  chunks.push(`${data.label}.`);
+  let ov = (data.overview || '').replace(/\s+/g, ' ').trim();
+  if (ov.length > 520) ov = `${ov.slice(0, 517)}…`;
+  chunks.push(ov);
+  for (const [k, v] of (data.stats || []).slice(0, 5)) {
+    chunks.push(`${k}: ${v}.`);
+  }
+  for (const ev of (data.highlights || []).slice(0, 3)) {
+    const bit = (ev.text || '').replace(/\s+/g, ' ').trim();
+    const short = bit.length > 160 ? `${bit.slice(0, 157)}…` : bit;
+    chunks.push(`${ev.when}. ${ev.title}. ${short}`);
+  }
+  return chunks.join(' ');
+}
+
+/** Stop MP3 + cancel any speech; call when switching continents or closing the panel. */
+export function stopContinentNarration() {
+  stopContinentNarrationFile();
+  try {
+    window.speechSynthesis?.cancel();
+  } catch {
+    /* ignore */
+  }
+  notifyContinentNarration('idle');
+}
+
+export function pauseContinentNarration() {
+  if (continentNarrationUsingFile && continentNarrationAudioEl) {
+    continentNarrationAudioEl.pause();
+    notifyContinentNarration('paused');
+    return;
+  }
+  try {
+    window.speechSynthesis?.pause();
+    notifyContinentNarration('paused');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function resumeContinentNarration() {
+  if (continentNarrationUsingFile && continentNarrationAudioEl) {
+    continentNarrationAudioEl
+      .play()
+      .then(() => notifyContinentNarration('speaking'))
+      .catch(() => notifyContinentNarration('idle'));
+    return;
+  }
+  try {
+    window.speechSynthesis?.resume();
+    notifyContinentNarration('speaking');
+  } catch {
+    /* ignore */
+  }
+}
+
+export function isContinentNarrationPaused() {
+  if (continentNarrationUsingFile && continentNarrationAudioEl) {
+    const a = continentNarrationAudioEl;
+    return a.paused && !a.ended && !!a.src && a.currentTime > 0;
+  }
+  const s = window.speechSynthesis;
+  return !!(s && s.speaking && s.paused);
+}
+
+/** Prefer voices that usually sound more natural (varies by OS/browser). */
+let cachedNarrationVoice = /** @type {SpeechSynthesisVoice | null} */ (null);
+let narrationVoicesListenerAttached = false;
+
+function narrVoiceScore(/** @type {SpeechSynthesisVoice} */ v) {
+  const n = (v.name || '').toLowerCase();
+  let s = 0;
+  if (/google uk english|google us english|google english/i.test(n)) s += 22;
+  if (/premium|natural|neural|enhanced|wavenet/i.test(n)) s += 18;
+  if (/google/i.test(n) && /english/i.test(n)) s += 14;
+  if (/siri|samantha|daniel|karen|moira|fiona|aaron|thomas|serena|victoria|alex/i.test(n)) s += 8;
+  if (v.localService) s += 1;
+  if (/microsoft\s+(david|zira|mark|hazel|susan)/i.test(n) && !/natural|neural/i.test(n)) s -= 10;
+  if (/compact|basic|legacy/i.test(n)) s -= 6;
+  return s;
+}
+
+function pickNarrationVoice() {
+  const syn = window.speechSynthesis;
+  if (!syn) return null;
+  const voices = syn.getVoices();
+  if (!voices.length) return null;
+  const en = voices.filter((v) => /^en(-|$)/i.test((v.lang || '').trim()));
+  const pool = en.length ? en : voices;
+  const sorted = [...pool].sort((a, b) => narrVoiceScore(b) - narrVoiceScore(a));
+  return sorted[0] || null;
+}
+
+function ensureNarrationVoicesListener() {
+  if (narrationVoicesListenerAttached) return;
+  const syn = window.speechSynthesis;
+  if (!syn) return;
+  narrationVoicesListenerAttached = true;
+  const refresh = () => {
+    const next = pickNarrationVoice();
+    if (next) cachedNarrationVoice = next;
+  };
+  syn.addEventListener('voiceschanged', refresh);
+  refresh();
+}
+
+/**
+ * TTS fallback when no MP3 mapping, load error, or decode failure.
+ * (Playback trigger for file path is `tryPlayContinentNarrationFile` below.)
+ */
+function speakContinentNarrationTtsOnly(/** @type {ContinentNarrationShape} */ data) {
+  continentNarrationUsingFile = false;
+  const syn = window.speechSynthesis;
+  if (!syn || !data) {
+    notifyContinentNarration('idle');
+    return;
+  }
+
+  const text = buildContinentNarrationText(data);
+  if (!text) {
+    notifyContinentNarration('idle');
+    return;
+  }
+
+  ensureNarrationVoicesListener();
+  if (!cachedNarrationVoice) cachedNarrationVoice = pickNarrationVoice();
+
+  const u = new SpeechSynthesisUtterance(text);
+  if (cachedNarrationVoice) {
+    u.voice = cachedNarrationVoice;
+    u.lang = cachedNarrationVoice.lang || 'en-US';
+  } else {
+    u.lang = 'en-US';
+  }
+  u.rate = 0.87;
+  u.pitch = 1.08;
+  u.volume = 1;
+  u.onend = () => notifyContinentNarration('idle');
+  u.onerror = () => notifyContinentNarration('idle');
+
+  syn.speak(u);
+  notifyContinentNarration('speaking');
+}
+
+/**
+ * Load `narrations/{stem}.mp3` (HTML5 Audio). On success plays; on error falls back to TTS.
+ * Audio is loaded here — `src` set relative to current page origin.
+ */
+function tryPlayContinentNarrationFile(/** @type {ContinentNarrationShape} */ data, stem) {
+  const el = ensureContinentNarrationAudio();
+  try {
+    window.speechSynthesis?.cancel();
+  } catch {
+    /* ignore */
+  }
+  stopContinentNarrationFile();
+
+  const url = `${NARRATION_FOLDER}/${stem}.mp3`;
+  el.src = url;
+  continentNarrationUsingFile = true;
+
+  el.onplay = () => notifyContinentNarration('speaking');
+  el.onended = () => {
+    continentNarrationUsingFile = false;
+    notifyContinentNarration('idle');
+  };
+  el.onerror = () => {
+    continentNarrationUsingFile = false;
+    stopContinentNarrationFile();
+    speakContinentNarrationTtsOnly(data);
+  };
+  el.onpause = () => {
+    if (!el.ended && el.currentTime > 0) notifyContinentNarration('paused');
+  };
+
+  el.play().catch(() => {
+    continentNarrationUsingFile = false;
+    stopContinentNarrationFile();
+    speakContinentNarrationTtsOnly(data);
+  });
+}
+
+/**
+ * Entry: stop any prior clip, then prefer MP3 for this continent id, else TTS.
+ * Triggered from globe panel (see app.js) when user presses Play or auto-narrator is on.
+ */
+export function speakContinentNarrationFromData(/** @type {ContinentNarrationShape} */ data) {
+  stopContinentNarration();
+  if (!data) return;
+
+  const id = data.id;
+  const stem = id ? NARRATION_STEM_BY_CONTINENT_ID[id] : undefined;
+  if (stem) {
+    tryPlayContinentNarrationFile(data, stem);
+    return;
+  }
+
+  speakContinentNarrationTtsOnly(data);
 }

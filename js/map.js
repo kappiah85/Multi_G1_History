@@ -229,7 +229,10 @@ async function getSatelliteImage() {
   return null;
 }
 
-async function buildBaseImageData(features, w, h, mode) {
+/**
+ * @param {boolean} useSatellite When false, draw theme “map” ocean only (political-style base); borders still rasterized on top.
+ */
+async function buildBaseImageData(features, w, h, mode, useSatellite) {
   const pal = readMapPalette();
   const tmp = document.createElement('canvas');
   tmp.width = w;
@@ -247,15 +250,21 @@ async function buildBaseImageData(features, w, h, mode) {
     return data;
   }
 
-  const sat = await getSatelliteImage();
-  if (sat) {
-    try {
-      tctx.drawImage(sat, 0, 0, w, h);
-    } catch {
+  if (useSatellite) {
+    const sat = await getSatelliteImage();
+    if (sat) {
+      try {
+        tctx.drawImage(sat, 0, 0, w, h);
+      } catch {
+        tctx.fillStyle = `rgb(${pal.ocean[0]},${pal.ocean[1]},${pal.ocean[2]})`;
+        tctx.fillRect(0, 0, w, h);
+      }
+    } else {
       tctx.fillStyle = `rgb(${pal.ocean[0]},${pal.ocean[1]},${pal.ocean[2]})`;
       tctx.fillRect(0, 0, w, h);
     }
   } else {
+    /* Map view: flat ocean colour — satellite texture skipped for clarity / performance. */
     tctx.fillStyle = `rgb(${pal.ocean[0]},${pal.ocean[1]},${pal.ocean[2]})`;
     tctx.fillRect(0, 0, w, h);
   }
@@ -313,10 +322,20 @@ function canvasToInternal(canvas, clientX, clientY) {
  * @param {HTMLCanvasElement} canvas
  * @param {{ ui: ReturnType<import('./ui-controls.js').initMapUi>, lineModeSelect: HTMLSelectElement | null, statusEl: HTMLElement | null }} opts
  */
+const MAP_SATELLITE_BASE_KEY = 'whe-map-satellite-base';
+
 export function initWorldMap(canvas, opts) {
   const { ui, lineModeSelect, statusEl } = opts;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  if (!ctx) return { rebuildBaseLayer: () => {}, redrawTheme: () => {}, destroy: () => {} };
+  if (!ctx) {
+    return {
+      rebuildBaseLayer: () => {},
+      redrawTheme: () => {},
+      destroy: () => {},
+      getBaseLayerSatellite: () => true,
+      setBaseLayerSatellite: () => {},
+    };
+  }
 
   const W = (canvas.width = 900);
   const H = (canvas.height = 450);
@@ -324,6 +343,8 @@ export function initWorldMap(canvas, opts) {
   let features = [];
   let baseImageData = null;
   let mode = lineModeSelect?.value === 'bresenham' ? 'bresenham' : 'dda';
+  /** Satellite imagery vs flat ocean “map” backdrop (borders unchanged). */
+  let useSatelliteBase = localStorage.getItem(MAP_SATELLITE_BASE_KEY) !== '0';
 
   let hoverIndex = -1;
   let selectedIndex = -1;
@@ -387,15 +408,24 @@ export function initWorldMap(canvas, opts) {
     rafId = requestAnimationFrame(renderFrame);
   }
 
+  function getBaseLayerSatellite() {
+    return useSatelliteBase;
+  }
+
+  function setBaseLayerSatellite(on) {
+    useSatelliteBase = !!on;
+    localStorage.setItem(MAP_SATELLITE_BASE_KEY, useSatelliteBase ? '1' : '0');
+    void rebuildBaseLayer();
+  }
+
   async function rebuildBaseLayer() {
     mode = getLineMode();
     if (!features.length) return;
-    setStatus('Loading satellite imagery…');
+    setStatus(useSatelliteBase ? 'Loading satellite imagery…' : 'Drawing map…');
     try {
-      baseImageData = await buildBaseImageData(features, W, H, mode);
-      setStatus(
-        `${features.length} countries · satellite base · ${mode.toUpperCase()} borders · hover / tap`
-      );
+      baseImageData = await buildBaseImageData(features, W, H, mode, useSatelliteBase);
+      const baseLabel = useSatelliteBase ? 'satellite base' : 'map base';
+      setStatus(`${features.length} countries · ${baseLabel} · ${mode.toUpperCase()} borders · hover / tap`);
     } catch {
       setStatus('Could not build map layer.');
     }
@@ -496,6 +526,8 @@ export function initWorldMap(canvas, opts) {
 
   return {
     rebuildBaseLayer,
+    getBaseLayerSatellite,
+    setBaseLayerSatellite,
     redrawTheme() {
       void rebuildBaseLayer();
     },

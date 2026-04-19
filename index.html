@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Globe — World History Explorer</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -28,10 +28,6 @@
           <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
         </button>
       </div>
-      <p class="theme-hint" id="themeColorHint">
-        <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
-        triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
-      </p>
     </header>
 
     <div id="siteMainNav" class="site-main-nav">
@@ -79,6 +75,19 @@
     <div class="info-panel__inner">
       <h2 id="panelTitle" class="info-panel__title"></h2>
       <p id="panelOverview" class="info-panel__text"></p>
+
+      <div class="panel-narration" id="panelNarrationBlock" aria-label="Optional narration">
+        <h3 class="info-panel__subtitle">Narration</h3>
+        <label class="panel-narration__auto">
+          <input type="checkbox" id="panelNarratorAuto" />
+          <span>🔊 Narrator on — auto-play narration when a region opens</span>
+        </label>
+        <div class="panel-narration__tools">
+          <button type="button" id="panelNarrationPlay" class="btn btn--primary">▶ Play narration</button>
+          <button type="button" id="panelNarrationPause" class="btn" disabled>⏸ Pause</button>
+          <button type="button" id="panelNarrationStop" class="btn">⏹ Stop</button>
+        </div>
+      </div>
 
       <h3 class="info-panel__subtitle">Key statistics</h3>
       <dl class="stats" id="panelStats"></dl>

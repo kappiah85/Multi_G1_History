@@ -2,11 +2,15 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { initThemeSystem, isLightTheme } from './theme.js';
 import { initMobileNav } from './mobile-nav.js';
+import { initGlobeNarrationPanel } from './ui-controls.js';
+import { stopContinentNarration, speakContinentNarrationFromData, getContinentNarratorAuto } from './multimedia.js';
 import { CONTINENTS, CONTINENT_TIMELINES, latLonFromUV, continentFromLatLon } from './data.js';
 import { runTimelineAnimation, clearTimelineCanvas } from './continentTimeline.js';
 
 let panelAnimToken = 0;
 let panelContinentId = null;
+/** Last opened continent row (for “Play narration” + auto-read; wired in ui-controls.js). */
+let lastContinentNarrationPayload = null;
 
 function cancelPanelTimeline() {
   panelAnimToken += 1;
@@ -42,6 +46,10 @@ function findContinentData(id) {
 function openPanel(continentId) {
   const data = findContinentData(continentId);
   if (!data) return;
+
+  /* Narration: point UI + idle sync at the new continent before stopping the previous clip. */
+  lastContinentNarrationPayload = data;
+  stopContinentNarration();
 
   const panel = document.getElementById('infoPanel');
   const backdrop = document.getElementById('panelBackdrop');
@@ -142,9 +150,17 @@ function openPanel(continentId) {
   panel.setAttribute('aria-hidden', 'false');
   backdrop.hidden = false;
   requestAnimationFrame(() => backdrop.classList.add('is-visible'));
+
+  /* Narration trigger: auto-read when the narrator toggle is on (multimedia.js). */
+  if (getContinentNarratorAuto()) {
+    requestAnimationFrame(() => speakContinentNarrationFromData(data));
+  }
 }
 
 function closePanel() {
+  lastContinentNarrationPayload = null;
+  stopContinentNarration();
+
   const panel = document.getElementById('infoPanel');
   const backdrop = document.getElementById('panelBackdrop');
   const video = document.getElementById('panelVideo');
@@ -424,6 +440,7 @@ function initGlobe() {
 
 initPanelTimeline();
 initMobileNav();
+initGlobeNarrationPanel(() => lastContinentNarrationPayload);
 
 const globeApi = initGlobe();
 initThemeSystem({

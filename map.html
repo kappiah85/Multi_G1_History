@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Explore Map — World History Explorer</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -15,7 +15,7 @@
             <span class="brand__icon" aria-hidden="true">◉</span>
             <div>
               <h1 class="brand__title">World History Explorer</h1>
-              <p class="tagline">Satellite world map · GeoJSON · borders</p>
+              <p class="tagline">World map · GeoJSON · optional satellite base</p>
             </div>
           </a>
         </div>
@@ -30,10 +30,6 @@
           <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
         </button>
       </div>
-      <p class="theme-hint" id="themeColorHint">
-        <strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” V). Light mode shifts component
-        triples toward 255 (brighter RGB). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.
-      </p>
     </header>
 
     <div id="siteMainNav" class="site-main-nav">
@@ -59,9 +55,9 @@
     <section class="map-page__intro" aria-labelledby="map-heading">
       <h2 id="map-heading" class="section-heading">Interactive country map</h2>
       <p class="map-page__lead">
-        The base layer is <strong>satellite-style Earth imagery</strong> (equirectangular texture, same projection as lon/lat → map pixels).
-        Country borders are rasterized with <strong>DDA</strong> or <strong>Bresenham</strong> (discrete steps, not <code>stroke()</code>).
-        Selection uses <strong>ray-casting point-in-polygon</strong>. Natural Earth 110m GeoJSON loads from the network.
+        Use <strong>Satellite view</strong> for Earth imagery or <strong>Map view</strong> for a simple ocean backdrop—country borders stay on top either way.
+        Borders use <strong>DDA</strong> or <strong>Bresenham</strong> (discrete steps, not <code>stroke()</code>); selection uses <strong>ray-casting point-in-polygon</strong>.
+        Natural Earth 110m GeoJSON loads from the network.
       </p>
       <div class="map-page__toolbar">
         <label class="map-page__select-label">
@@ -71,6 +67,15 @@
             <option value="bresenham">Bresenham</option>
           </select>
         </label>
+        <button
+          type="button"
+          id="btnMapBaseToggle"
+          class="btn"
+          aria-pressed="true"
+          aria-label="Switch between map style and satellite imagery"
+        >
+          Satellite view (on)
+        </button>
         <label class="map-page__narrate">
           <input type="checkbox" id="mapNarrateToggle" />
           Read aloud (speech)

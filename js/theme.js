@@ -10,7 +10,6 @@ export function isLightTheme() {
 export function initThemeSystem(options = {}) {
   const { globeApplyTheme, timelinePanelApi, onAfterThemeApply } = options;
   const btn = document.getElementById('btnThemeToggle');
-  const hint = document.getElementById('themeColorHint');
 
   function applyDocumentTheme(mode) {
     const light = mode === 'light';
@@ -18,11 +17,6 @@ export function initThemeSystem(options = {}) {
     if (btn) {
       btn.textContent = light ? 'Dark mode' : 'Light mode';
       btn.setAttribute('aria-pressed', String(light));
-    }
-    if (hint) {
-      hint.innerHTML = light
-        ? '<strong>Colour models:</strong> Light theme raises RGB components (higher luminance — like raising HSV <strong>V</strong>). Globe lights are boosted so the 3D scene stays readable.'
-        : '<strong>Colour models:</strong> Dark UI uses lower RGB luminance (similar to lower HSV “value” <strong>V</strong>). Timeline &amp; algorithm canvases read colours from CSS variables so pixels track the theme.';
     }
     globeApplyTheme?.(light);
     timelinePanelApi?.refreshClear?.();

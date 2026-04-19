@@ -6,7 +6,18 @@
  */
 
 import { getFactsForCountry, getNarrationLine } from './mapCountryFacts.js';
-import { getQuizSoundsEnabled, setQuizSoundsEnabled } from './multimedia.js';
+import {
+  getQuizSoundsEnabled,
+  setQuizSoundsEnabled,
+  stopContinentNarration,
+  pauseContinentNarration,
+  resumeContinentNarration,
+  speakContinentNarrationFromData,
+  getContinentNarratorAuto,
+  setContinentNarratorAuto,
+  setContinentNarrationUiCallback,
+  isContinentNarrationPaused,
+} from './multimedia.js';
 
 /** Wire the side panel and status line for the 2D world map page. */
 export function initMapUi() {
@@ -101,4 +112,91 @@ export function initQuizSoundToggle(button) {
     setQuizSoundsEnabled(!getQuizSoundsEnabled());
     sync();
   });
+}
+
+/**
+ * Explore Map: toggle flat “map” ocean vs satellite imagery base (see map.js `setBaseLayerSatellite`).
+ * @param {HTMLButtonElement | null} button
+ * @param {{ getBaseLayerSatellite?: () => boolean, setBaseLayerSatellite?: (on: boolean) => void } | null | undefined} mapApi
+ */
+export function initMapSatelliteToggle(button, mapApi) {
+  if (!button || !mapApi?.getBaseLayerSatellite || !mapApi?.setBaseLayerSatellite) return;
+
+  function sync() {
+    const sat = !!mapApi.getBaseLayerSatellite();
+    button.setAttribute('aria-pressed', String(sat));
+    button.textContent = sat ? 'Satellite view (on)' : 'Map view (on)';
+  }
+
+  sync();
+  button.addEventListener('click', () => {
+    mapApi.setBaseLayerSatellite(!mapApi.getBaseLayerSatellite());
+    sync();
+  });
+}
+
+/* --- Globe (index) continent panel: MP3 narration + TTS fallback (logic in multimedia.js) --- */
+
+const NARRATION_BTN_PLAY = '▶ Play narration';
+const NARRATION_BTN_RESUME = '▶ Resume narration';
+const NARRATION_BTN_PAUSE = '⏸ Pause';
+const NARRATION_BTN_STOP = '⏹ Stop';
+
+/**
+ * Wires Narrator auto toggle and Play / Pause / Stop for the globe info panel.
+ * Audio load + playback triggers live in `multimedia.js`; selection triggers in `app.js` `openPanel`.
+ * @param {() => object | null} getLastContinentPayload last opened continent row (same shape as `CONTINENTS` entries)
+ */
+export function initGlobeNarrationPanel(getLastContinentPayload) {
+  function syncNarrationButtons(phase) {
+    const play = document.getElementById('panelNarrationPlay');
+    const pause = document.getElementById('panelNarrationPause');
+    const stopB = document.getElementById('panelNarrationStop');
+    if (!play || !pause || !stopB) return;
+    const payload = getLastContinentPayload();
+    if (phase === 'speaking') {
+      play.disabled = false;
+      play.textContent = NARRATION_BTN_PLAY;
+      pause.disabled = false;
+      pause.textContent = NARRATION_BTN_PAUSE;
+      stopB.disabled = false;
+      stopB.textContent = NARRATION_BTN_STOP;
+    } else if (phase === 'paused') {
+      play.disabled = false;
+      play.textContent = NARRATION_BTN_RESUME;
+      pause.disabled = true;
+      pause.textContent = NARRATION_BTN_PAUSE;
+      stopB.disabled = false;
+      stopB.textContent = NARRATION_BTN_STOP;
+    } else {
+      play.disabled = !payload;
+      play.textContent = NARRATION_BTN_PLAY;
+      pause.disabled = true;
+      pause.textContent = NARRATION_BTN_PAUSE;
+      stopB.disabled = false;
+      stopB.textContent = NARRATION_BTN_STOP;
+    }
+  }
+
+  const auto = document.getElementById('panelNarratorAuto');
+  const play = document.getElementById('panelNarrationPlay');
+  const pause = document.getElementById('panelNarrationPause');
+  const stopB = document.getElementById('panelNarrationStop');
+  if (!auto || !play || !pause || !stopB) return;
+
+  setContinentNarrationUiCallback(syncNarrationButtons);
+  auto.checked = getContinentNarratorAuto();
+  auto.addEventListener('change', () => setContinentNarratorAuto(auto.checked));
+
+  play.addEventListener('click', () => {
+    if (isContinentNarrationPaused()) {
+      resumeContinentNarration();
+      return;
+    }
+    const payload = getLastContinentPayload();
+    if (payload) speakContinentNarrationFromData(payload);
+  });
+  pause.addEventListener('click', () => pauseContinentNarration());
+  stopB.addEventListener('click', () => stopContinentNarration());
+  syncNarrationButtons('idle');
 }
