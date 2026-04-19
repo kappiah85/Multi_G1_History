@@ -1899,19 +1899,30 @@ body.map-panel-open {
    ============================================================================ */
 
 /* ── Site Header ── */
-/* z-index must exceed every backdrop/sheet in the root context (70, 90…)
-   so that the fixed .site-nav inside this stacking context (created by
-   backdrop-filter) still paints above those elements. */
+/* backdrop-filter on the element itself makes it a containing block for
+   position:fixed children (CSS Filters Level 2 spec), which breaks the
+   slide-in nav. The blur is moved to ::before so the header element is
+   NOT a containing block. position:sticky + z-index still creates the
+   stacking context that keeps the nav above every backdrop. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 200;
   height: 56px;
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.25s ease;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: var(--header-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid var(--border);
-  transition: background 0.3s ease, border-color 0.25s ease;
+  transition: background 0.3s ease;
+  z-index: -1;
 }
 
 .site-header__inner {
