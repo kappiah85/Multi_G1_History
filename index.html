@@ -5,142 +5,177 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Globe — World History Explorer</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <!-- Fast auth guard: runs synchronously before any rendering -->
+  <script>if (sessionStorage.getItem('whe_logged_in') !== 'true') { window.location.replace('login.html'); }</script>
 </head>
 <body>
-  <div class="site-chrome">
-    <header class="app-header">
-      <div class="app-header__bar">
-        <div class="brand">
-          <span class="brand__icon" aria-hidden="true">◉</span>
-          <div>
-            <h1>World History Explorer</h1>
-            <p class="tagline">Interactive 3D Earth · History · Multimedia</p>
-          </div>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <span class="brand">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div class="brand__text">
+          <span class="brand__name">World History Explorer</span>
+          <span class="brand__sub">Interactive 3D Earth · History · Multimedia</span>
         </div>
-        <button
-          type="button"
-          class="mobile-nav-toggle"
-          id="btnMobileNavToggle"
-          aria-expanded="false"
-          aria-controls="siteMainNav"
-          aria-label="Open site menu"
-        >
-          <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
-        </button>
-      </div>
-    </header>
-
-  </div>
-
-  <div id="siteMainNav" class="site-main-nav">
-    <nav class="toolbar" aria-label="Globe controls">
-      <button type="button" id="btnToggleRotation" class="btn btn--primary" aria-pressed="true">
-        Pause rotation
+      </span>
+      <nav class="site-nav" id="siteMainNav" aria-label="Site pages">
+        <a href="index.html" class="site-nav__link is-active" aria-current="page">🌍 Globe</a>
+        <a href="quiz.html" class="site-nav__link">🧠 Quiz</a>
+        <a href="timeline.html" class="site-nav__link">📅 Timeline</a>
+        <a href="map.html" class="site-nav__link">🗺️ Map</a>
+        <div class="site-nav__sep" aria-hidden="true"></div>
+        <button type="button" id="btnThemeToggle" class="btn btn--sm" aria-pressed="false">☀ Light</button>
+      </nav>
+      <button
+        type="button"
+        class="mobile-nav-toggle"
+        id="btnMobileNavToggle"
+        aria-expanded="false"
+        aria-controls="siteMainNav"
+        aria-label="Open site menu"
+      >
+        <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
       </button>
-      <button type="button" id="btnResetCamera" class="btn">Reset view</button>
-      <button type="button" id="btnToggleWireframe" class="btn" aria-pressed="false">Wireframe</button>
-      <a href="map.html" class="btn">Explore Map</a>
-      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
-    </nav>
-    <nav class="section-nav" aria-label="Site pages">
-      <span class="section-nav__label">Pages</span>
-      <ul class="section-nav__list">
-        <li><a href="index.html" class="section-nav__link is-active" aria-current="page">Globe</a></li>
-        <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
-        <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
-        <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
-      </ul>
-    </nav>
-  </div>
+    </div>
+  </header>
 
   <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
-  <main class="layout layout--globe-page">
-    <div class="layout-main-row">
-      <div class="layout-main-row__globe">
-        <section id="section-globe" class="globe-section" aria-labelledby="globe-heading">
-          <h2 id="globe-heading" class="section-heading">Interactive globe</h2>
-          <div id="globe-container" class="globe-container" role="application" aria-label="Rotatable 3D globe. Click a continent to learn more."></div>
-          <p class="hint">Drag to rotate · Scroll or pinch to zoom · Tap land regions to open history panels</p>
-          <aside class="continent-nav" aria-label="Continent shortcuts">
-            <span class="continent-nav__label">Jump to:</span>
-            <div class="continent-nav__buttons" id="continentQuickNav"></div>
-          </aside>
-        </section>
-      </div>
-    </div>
-  </main>
+  <main class="globe-workspace">
 
-  <aside id="infoPanel" class="info-panel" aria-hidden="true" aria-labelledby="panelTitle">
-    <button type="button" class="info-panel__close" id="btnClosePanel" aria-label="Close panel">&times;</button>
-    <div class="info-panel__inner">
-      <h2 id="panelTitle" class="info-panel__title"></h2>
-      <p id="panelOverview" class="info-panel__text"></p>
-
-      <div class="panel-narration" id="panelNarrationBlock" aria-label="Optional narration">
-        <h3 class="info-panel__subtitle">Narration</h3>
-        <label class="panel-narration__auto">
-          <input type="checkbox" id="panelNarratorAuto" />
-          <span>🔊 Narrator on — auto-play narration when a region opens</span>
-        </label>
-        <div class="panel-narration__tools">
-          <button type="button" id="panelNarrationPlay" class="btn btn--primary">▶ Play narration</button>
-          <button type="button" id="panelNarrationPause" class="btn" disabled>⏸ Pause</button>
-          <button type="button" id="panelNarrationStop" class="btn">⏹ Stop</button>
+    <!-- ── Left: Globe + Controls ── -->
+    <section class="globe-panel" aria-labelledby="globe-heading">
+      <div class="globe-panel__top">
+        <div class="globe-panel__heading">
+          <span class="chapter-label" aria-hidden="true">🌍 Explore &amp; Discover</span>
+          <h2 id="globe-heading" class="globe-panel__title">Interactive Globe</h2>
+        </div>
+        <div class="globe-controls" role="toolbar" aria-label="Globe controls">
+          <button type="button" id="btnToggleRotation" class="btn btn--sm" aria-pressed="true">⏸ Pause</button>
+          <button type="button" id="btnResetCamera" class="btn btn--sm">↺ Reset</button>
+          <button type="button" id="btnToggleWireframe" class="btn btn--sm" aria-pressed="false">⬡ Wire</button>
+          <a href="map.html" class="btn btn--sm">🗺 Map</a>
         </div>
       </div>
 
-      <h3 class="info-panel__subtitle">Key statistics</h3>
-      <dl class="stats" id="panelStats"></dl>
+      <div id="globe-container" class="globe-container" role="application" aria-label="Rotatable 3D globe. Click a continent to learn more."></div>
 
-      <h3 class="info-panel__subtitle">Timeline highlights</h3>
-      <ul class="event-list" id="panelEvents"></ul>
+      <p class="hint">Drag to rotate · Scroll or pinch to zoom · Tap land regions to explore</p>
 
-      <h3 class="info-panel__subtitle">Timeline drawing</h3>
-      <p class="info-panel__timeline-lead">
-        Animated timeline for <strong>this region</strong>: vertical spine (DDA or Bresenham), midpoint circles at each event, and clipped quadratic Bézier chords—same raster pipeline as the Timeline page.
-      </p>
-      <div class="panel-timeline-toolbar">
-        <label class="panel-timeline-toolbar__label">
-          Line algorithm
-          <select id="panelTimelineLineMode" aria-label="Line algorithm for panel timeline">
-            <option value="dda">DDA</option>
-            <option value="bresenham">Bresenham</option>
-          </select>
-        </label>
-        <button type="button" id="panelTimelinePlay" class="btn btn--primary">Play timeline</button>
+      <nav aria-label="Continent shortcuts" class="continent-nav">
+        <span class="continent-nav__label">Jump to</span>
+        <div class="continent-nav__buttons" id="continentQuickNav"></div>
+      </nav>
+    </section>
+
+    <!-- ── Right: Info Sidebar ── -->
+    <aside
+      id="infoPanel"
+      class="info-sidebar"
+      aria-hidden="true"
+      aria-labelledby="panelTitle"
+    >
+      <!-- Empty / placeholder state -->
+      <div class="info-sidebar__empty" id="panelEmptyState">
+        <div class="info-sidebar__orb" aria-hidden="true">🌐</div>
+        <h3 class="info-sidebar__empty-title">Select a Continent</h3>
+        <p class="info-sidebar__empty-body">
+          Tap any region on the globe or use the jump-to buttons to explore history,
+          statistics, media, and an animated algorithm timeline.
+        </p>
+        <div class="feature-grid">
+          <button type="button" class="feature-chip" data-chip-section="panelEvents">📚 History</button>
+          <button type="button" class="feature-chip" data-chip-section="panelStats">📊 Statistics</button>
+          <button type="button" class="feature-chip" data-chip-section="panelImages">🖼 Images</button>
+          <button type="button" class="feature-chip" data-chip-section="panelTimelineCanvas">📅 Timeline</button>
+          <button type="button" class="feature-chip" data-chip-section="panelNarrationBlock">🎙 Narration</button>
+          <button type="button" class="feature-chip" data-chip-section="panelVideoYoutubeWrap">🎬 Video</button>
+        </div>
       </div>
-      <canvas id="panelTimelineCanvas" width="300" height="420" class="panel-timeline-canvas" aria-label="Animated timeline for selected continent"></canvas>
-      <p id="panelTimelineStatus" class="timeline-status panel-timeline-status">Open a region from the globe, then press Play timeline.</p>
 
-      <h3 class="info-panel__subtitle">Reference maps</h3>
-      <div class="media-row" id="panelImages"></div>
+      <!-- Continent detail content (shown after selection) -->
+      <div class="info-sidebar__content" id="panelContent" hidden>
+        <button type="button" class="info-panel__close" id="btnClosePanel" aria-label="Close panel">×</button>
+        <div class="info-panel__inner">
+          <h2 id="panelTitle" class="info-panel__title"></h2>
+          <p id="panelOverview" class="info-panel__text"></p>
 
-      <h3 class="info-panel__subtitle">Video</h3>
-      <div id="panelVideoYoutubeWrap" class="media-video-youtube" hidden>
-        <iframe
-          id="panelVideoYoutube"
-          class="media-video-youtube__iframe"
-          title="Region history video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen
-          loading="lazy"
-        ></iframe>
+          <div class="panel-narration" id="panelNarrationBlock" aria-label="Optional narration">
+            <h3 class="info-panel__subtitle">Narration</h3>
+            <label class="panel-narration__auto">
+              <input type="checkbox" id="panelNarratorAuto" />
+              <span>🔊 Auto-play narration when a region opens</span>
+            </label>
+            <div class="panel-narration__tools">
+              <button type="button" id="panelNarrationPlay" class="btn btn--primary btn--sm">▶ Play</button>
+              <button type="button" id="panelNarrationPause" class="btn btn--sm" disabled>⏸ Pause</button>
+              <button type="button" id="panelNarrationStop" class="btn btn--sm">⏹ Stop</button>
+            </div>
+          </div>
+
+          <h3 class="info-panel__subtitle">Key statistics</h3>
+          <dl class="stats" id="panelStats"></dl>
+
+          <h3 class="info-panel__subtitle">Timeline highlights</h3>
+          <ul class="event-list" id="panelEvents"></ul>
+
+          <h3 class="info-panel__subtitle">Timeline drawing</h3>
+          <p class="info-panel__timeline-lead">
+            Animated timeline for <strong>this region</strong>: vertical spine (DDA or Bresenham),
+            midpoint circles at each event, and clipped quadratic Bézier chords—same raster pipeline as the Timeline page.
+          </p>
+          <div class="panel-timeline-toolbar">
+            <label class="panel-timeline-toolbar__label">
+              Algorithm
+              <select id="panelTimelineLineMode">
+                <option value="dda">DDA</option>
+                <option value="bresenham">Bresenham</option>
+              </select>
+            </label>
+            <button type="button" id="panelTimelinePlay" class="btn btn--primary btn--sm">▶ Play timeline</button>
+          </div>
+          <canvas
+            id="panelTimelineCanvas"
+            class="panel-timeline-canvas"
+            width="300"
+            height="420"
+            aria-label="Animated continent timeline canvas"
+          ></canvas>
+          <p id="panelTimelineStatus" class="timeline-status panel-timeline-status">Open a region from the globe, then press Play timeline.</p>
+
+          <h3 class="info-panel__subtitle">Reference maps</h3>
+          <div class="media-row" id="panelImages"></div>
+
+          <h3 class="info-panel__subtitle">Video</h3>
+          <div id="panelVideoYoutubeWrap" class="media-video-youtube" hidden>
+            <iframe
+              id="panelVideoYoutube"
+              class="media-video-youtube__iframe"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="Region history video"
+              src=""
+            ></iframe>
+          </div>
+          <video id="panelVideo" class="media-video" controls preload="metadata" hidden></video>
+          <p id="panelMediaNote" class="info-panel__media-note"></p>
+        </div>
       </div>
-      <video id="panelVideo" class="media-video" controls playsinline preload="metadata" hidden></video>
+    </aside>
 
-      <p class="info-panel__note" id="panelMediaNote"></p>
-    </div>
-  </aside>
+  </main>
+
+  <!-- Backdrop dims page on mobile when sidebar opens as bottom sheet -->
   <div id="panelBackdrop" class="backdrop" hidden></div>
 
   <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
     }
-  }
   </script>
   <script type="module" src="js/app.js"></script>
 </body>

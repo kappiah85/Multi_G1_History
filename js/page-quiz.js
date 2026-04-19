@@ -1,5 +1,8 @@
+import { requireLogin, injectLogoutButton } from './auth.js';
 import { initThemeSystem } from './theme.js';
 import { initMobileNav } from './mobile-nav.js';
+
+requireLogin();
 import { preloadQuizSounds } from './multimedia.js';
 import { initQuizSoundToggle } from './ui-controls.js';
 import { CONTINENTS, getQuizPool } from './data.js';
@@ -38,6 +41,7 @@ function initWorldQuizHub() {
 }
 
 initMobileNav();
+injectLogoutButton();
 preloadQuizSounds();
 initQuizSoundToggle(document.getElementById('btnQuizSoundToggle'));
 initWorldQuizHub();

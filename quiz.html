@@ -5,78 +5,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Quiz — World History Explorer</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <script>if (sessionStorage.getItem('whe_logged_in') !== 'true') { window.location.replace('login.html'); }</script>
 </head>
 <body>
-  <div class="site-chrome">
-    <header class="app-header">
-      <div class="app-header__bar">
-        <div class="brand">
-          <a href="index.html" class="brand__link">
-            <span class="brand__icon" aria-hidden="true">◉</span>
-            <div>
-              <h1 class="brand__title">World History Explorer</h1>
-              <p class="tagline">World history quiz</p>
-            </div>
-          </a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand brand--link">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div class="brand__text">
+          <span class="brand__name">World History Explorer</span>
+          <span class="brand__sub">World History Quiz</span>
         </div>
-        <button
-          type="button"
-          class="mobile-nav-toggle"
-          id="btnMobileNavToggle"
-          aria-expanded="false"
-          aria-controls="siteMainNav"
-          aria-label="Open site menu"
-        >
-          <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
-        </button>
-      </div>
-    </header>
-
-  </div>
-
-  <div id="siteMainNav" class="site-main-nav">
-    <nav class="toolbar" aria-label="Page tools">
-      <a href="index.html" class="btn">Globe</a>
-      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
-    </nav>
-    <nav class="section-nav" aria-label="Site pages">
-      <span class="section-nav__label">Pages</span>
-      <ul class="section-nav__list">
-        <li><a href="index.html" class="section-nav__link">Globe</a></li>
-        <li><a href="quiz.html" class="section-nav__link is-active" aria-current="page">Quiz</a></li>
-        <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
-        <li><a href="map.html" class="section-nav__link">Explore Map</a></li>
-      </ul>
-    </nav>
-  </div>
+      </a>
+      <nav class="site-nav" id="siteMainNav" aria-label="Site pages">
+        <a href="index.html" class="site-nav__link">🌍 Globe</a>
+        <a href="quiz.html" class="site-nav__link is-active" aria-current="page">🧠 Quiz</a>
+        <a href="timeline.html" class="site-nav__link">📅 Timeline</a>
+        <a href="map.html" class="site-nav__link">🗺️ Map</a>
+        <div class="site-nav__sep" aria-hidden="true"></div>
+        <button type="button" id="btnThemeToggle" class="btn btn--sm" aria-pressed="false">☀ Light</button>
+      </nav>
+      <button
+        type="button"
+        class="mobile-nav-toggle"
+        id="btnMobileNavToggle"
+        aria-expanded="false"
+        aria-controls="siteMainNav"
+        aria-label="Open site menu"
+      >
+        <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
 
   <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
-  <main class="layout layout--subpage">
+  <main class="page-content">
     <section id="section-quiz" class="quiz-hub" aria-labelledby="quiz-hub-heading">
-      <h2 id="quiz-hub-heading" class="quiz-hub__title">World history quiz</h2>
-      <p class="quiz-hub__intro">
-        One question at a time: pick an answer for instant feedback. Get it wrong? Try again or use <strong>Show answer</strong>, then continue when you are ready.
-      </p>
-      <div class="quiz-hub__controls">
-        <label class="quiz-hub__select-label">
-          Focus
-          <select id="worldQuizScope" class="quiz-hub__select" aria-label="Quiz focus region">
-            <option value="">All continents (mixed)</option>
-          </select>
-        </label>
-        <button
-          type="button"
-          id="btnQuizSoundToggle"
-          class="btn"
-          aria-pressed="true"
-          aria-label="Turn quiz sound effects off"
-        >
-          Sound on
-        </button>
-        <button type="button" id="worldQuizStart" class="btn btn--primary">Start 5 questions</button>
+
+      <div class="quiz-hub__header">
+        <span class="chapter-label" aria-hidden="true">🧠 Test Your Knowledge</span>
+        <h2 id="quiz-hub-heading" class="quiz-hub__title">World History Quiz</h2>
+        <p class="quiz-hub__intro">
+          One question at a time — pick an answer for instant feedback. Wrong? Try again or reveal the answer, then keep going.
+        </p>
       </div>
+
+      <div class="quiz-hub__setup">
+        <div class="quiz-hub__controls">
+          <label class="quiz-hub__select-label">
+            <span>Focus region</span>
+            <select id="worldQuizScope" class="quiz-hub__select" aria-label="Quiz focus region">
+              <option value="">🌐 All continents (mixed)</option>
+            </select>
+          </label>
+          <button
+            type="button"
+            id="btnQuizSoundToggle"
+            class="btn"
+            aria-pressed="true"
+            aria-label="Turn quiz sound effects off"
+          >
+            🔊 Sound on
+          </button>
+        </div>
+        <button type="button" id="worldQuizStart" class="btn btn--primary btn--start">
+          ▶ Start 5 Questions
+        </button>
+      </div>
+
       <div id="worldQuizArea" class="quiz-hub__area" hidden></div>
+
     </section>
   </main>
 

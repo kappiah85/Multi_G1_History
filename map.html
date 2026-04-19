@@ -5,65 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Explore Map — World History Explorer</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <script>if (sessionStorage.getItem('whe_logged_in') !== 'true') { window.location.replace('login.html'); }</script>
 </head>
 <body>
-  <div class="site-chrome">
-    <header class="app-header">
-      <div class="app-header__bar">
-        <div class="brand">
-          <a href="index.html" class="brand__link">
-            <span class="brand__icon" aria-hidden="true">◉</span>
-            <div>
-              <h1 class="brand__title">World History Explorer</h1>
-              <p class="tagline">World map · GeoJSON · optional satellite base</p>
-            </div>
-          </a>
+
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a href="index.html" class="brand brand--link">
+        <span class="brand__icon" aria-hidden="true">◉</span>
+        <div class="brand__text">
+          <span class="brand__name">World History Explorer</span>
+          <span class="brand__sub">World Map · GeoJSON · Raster algorithms</span>
         </div>
-        <button
-          type="button"
-          class="mobile-nav-toggle"
-          id="btnMobileNavToggle"
-          aria-expanded="false"
-          aria-controls="siteMainNav"
-          aria-label="Open site menu"
-        >
-          <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
-        </button>
-      </div>
-    </header>
-
-  </div>
-
-  <div id="siteMainNav" class="site-main-nav">
-    <nav class="toolbar" aria-label="Page tools">
-      <a href="index.html" class="btn">Globe</a>
-      <button type="button" id="btnThemeToggle" class="btn" aria-pressed="false">Light mode</button>
-    </nav>
-    <nav class="section-nav" aria-label="Site pages">
-      <span class="section-nav__label">Pages</span>
-      <ul class="section-nav__list">
-        <li><a href="index.html" class="section-nav__link">Globe</a></li>
-        <li><a href="quiz.html" class="section-nav__link">Quiz</a></li>
-        <li><a href="timeline.html" class="section-nav__link">Timeline</a></li>
-        <li><a href="map.html" class="section-nav__link is-active" aria-current="page">Explore Map</a></li>
-      </ul>
-    </nav>
-  </div>
+      </a>
+      <nav class="site-nav" id="siteMainNav" aria-label="Site pages">
+        <a href="index.html" class="site-nav__link">🌍 Globe</a>
+        <a href="quiz.html" class="site-nav__link">🧠 Quiz</a>
+        <a href="timeline.html" class="site-nav__link">📅 Timeline</a>
+        <a href="map.html" class="site-nav__link is-active" aria-current="page">🗺️ Map</a>
+        <div class="site-nav__sep" aria-hidden="true"></div>
+        <button type="button" id="btnThemeToggle" class="btn btn--sm" aria-pressed="false">☀ Light</button>
+      </nav>
+      <button
+        type="button"
+        class="mobile-nav-toggle"
+        id="btnMobileNavToggle"
+        aria-expanded="false"
+        aria-controls="siteMainNav"
+        aria-label="Open site menu"
+      >
+        <span class="mobile-nav-toggle__icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </header>
 
   <div id="mobileNavBackdrop" class="mobile-nav-backdrop" hidden></div>
 
-  <main class="layout map-page">
-    <section class="map-page__intro" aria-labelledby="map-heading">
-      <h2 id="map-heading" class="section-heading">Interactive country map</h2>
-      <p class="map-page__lead">
-        Use <strong>Satellite view</strong> for Earth imagery or <strong>Map view</strong> for a simple ocean backdrop—country borders stay on top either way.
-        Borders use <strong>DDA</strong> or <strong>Bresenham</strong> (discrete steps, not <code>stroke()</code>); selection uses <strong>ray-casting point-in-polygon</strong>.
-        Natural Earth 110m GeoJSON loads from the network.
-      </p>
-      <div class="map-page__toolbar">
-        <label class="map-page__select-label">
-          Line algorithm
-          <select id="mapLineMode" aria-label="Border line rasterization mode">
+  <main class="page-content page-content--map">
+
+    <div class="map-page-header">
+      <div class="map-page-header__text">
+        <span class="chapter-label" aria-hidden="true">🗺️ World Map Explorer</span>
+        <h2 id="map-heading" class="map-page-header__title">Interactive Country Map</h2>
+        <p class="map-page-header__lead">
+          <strong>DDA</strong> or <strong>Bresenham</strong> rasterizes country borders — no <code>stroke()</code>.
+          Click a country for a historical snapshot. Selection uses <strong>ray-casting point-in-polygon</strong>.
+        </p>
+      </div>
+      <div class="map-page-header__controls">
+        <label class="field-label field-label--inline">
+          Border algorithm
+          <select id="mapLineMode" class="field-select" aria-label="Border line rasterization mode">
             <option value="dda">DDA</option>
             <option value="bresenham">Bresenham</option>
           </select>
@@ -75,28 +67,29 @@
           aria-pressed="true"
           aria-label="Switch between map style and satellite imagery"
         >
-          Satellite view (on)
+          🛰 Satellite on
         </button>
-        <label class="map-page__narrate">
+        <label class="field-label field-label--inline field-label--checkbox">
           <input type="checkbox" id="mapNarrateToggle" />
-          Read aloud (speech)
+          🗣 Read aloud
         </label>
       </div>
-      <p id="mapLoadStatus" class="map-page__status" aria-live="polite"></p>
-    </section>
+      <p id="mapLoadStatus" class="map-status" aria-live="polite"></p>
+    </div>
 
     <div class="map-workspace">
       <div class="map-canvas-wrap">
-        <canvas id="worldMapCanvas" width="900" height="450" aria-label="World map. Hover and click countries."></canvas>
+        <canvas id="worldMapCanvas" width="900" height="450" aria-label="World map. Click countries to learn more."></canvas>
       </div>
 
       <aside id="mapCountryPanel" class="map-country-panel" hidden aria-labelledby="mapCountryTitle">
         <button type="button" class="map-country-panel__close" id="mapCountryPanelClose" aria-label="Close country panel">&times;</button>
         <h3 id="mapCountryTitle" class="map-country-panel__title"></h3>
-        <p class="map-country-panel__hint">Historical snapshot (2–3 facts)</p>
+        <p class="map-country-panel__hint">Historical snapshot</p>
         <ul id="mapCountryFacts" class="map-country-panel__facts"></ul>
       </aside>
     </div>
+
   </main>
 
   <script type="module" src="js/page-map.js"></script>

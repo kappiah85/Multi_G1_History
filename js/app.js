@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { requireLogin, injectLogoutButton } from './auth.js';
 import { initThemeSystem, isLightTheme } from './theme.js';
 import { initMobileNav } from './mobile-nav.js';
+
+requireLogin();
 import { initGlobeNarrationPanel } from './ui-controls.js';
 import { stopContinentNarration, speakContinentNarrationFromData, getContinentNarratorAuto } from './multimedia.js';
 import { CONTINENTS, CONTINENT_TIMELINES, latLonFromUV, continentFromLatLon } from './data.js';
@@ -135,6 +138,12 @@ function openPanel(continentId) {
 
   document.getElementById('panelMediaNote').textContent = data.mediaNote || '';
 
+  /* Switch sidebar from empty state to content */
+  const emptyState = document.getElementById('panelEmptyState');
+  const contentState = document.getElementById('panelContent');
+  if (emptyState) emptyState.hidden = true;
+  if (contentState) contentState.hidden = false;
+
   document.body.classList.remove('mobile-nav-open');
   const navBackdrop = document.getElementById('mobileNavBackdrop');
   if (navBackdrop) {
@@ -143,14 +152,18 @@ function openPanel(continentId) {
   }
 
   const narrow = window.matchMedia('(max-width: 768px)').matches;
-  /* Keep the page from scrolling behind the bottom sheet on phones. */
+  /* On mobile the sidebar is a fixed bottom sheet — prevent scroll-behind. Desktop sidebar is always visible. */
   document.body.style.overflow = narrow ? 'hidden' : '';
   video.preload = narrow ? 'none' : 'metadata';
 
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
-  backdrop.hidden = false;
-  requestAnimationFrame(() => backdrop.classList.add('is-visible'));
+
+  /* Backdrop only on mobile (desktop sidebar doesn't need dimming) */
+  if (narrow) {
+    backdrop.hidden = false;
+    requestAnimationFrame(() => backdrop.classList.add('is-visible'));
+  }
 
   /* Narration trigger: auto-read when the narrator toggle is on (multimedia.js). */
   if (getContinentNarratorAuto()) {
@@ -177,6 +190,12 @@ function closePanel() {
   video.hidden = false;
   panelContinentId = null;
   cancelPanelTimeline();
+
+  /* Restore empty state in the sidebar */
+  const emptyState = document.getElementById('panelEmptyState');
+  const contentState = document.getElementById('panelContent');
+  if (emptyState) emptyState.hidden = false;
+  if (contentState) contentState.hidden = true;
 
   setTimeout(() => {
     if (!backdrop.classList.contains('is-visible')) backdrop.hidden = true;
@@ -396,7 +415,7 @@ function initGlobe() {
   document.getElementById('btnToggleRotation')?.addEventListener('click', (e) => {
     controls.autoRotate = !controls.autoRotate;
     e.currentTarget.setAttribute('aria-pressed', String(controls.autoRotate));
-    e.currentTarget.textContent = controls.autoRotate ? 'Pause rotation' : 'Resume rotation';
+    e.currentTarget.textContent = controls.autoRotate ? '⏸ Pause' : '▶ Rotate';
   });
 
   document.getElementById('btnResetCamera')?.addEventListener('click', () => {
@@ -412,6 +431,17 @@ function initGlobe() {
 
   document.getElementById('btnClosePanel')?.addEventListener('click', closePanel);
   document.getElementById('panelBackdrop')?.addEventListener('click', closePanel);
+
+  document.querySelectorAll('[data-chip-section]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const sectionId = btn.dataset.chipSection;
+      openPanel(CONTINENTS[0].id);
+      requestAnimationFrame(() => {
+        const target = document.getElementById(sectionId);
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+  });
 
   const quickNav = document.getElementById('continentQuickNav');
   if (quickNav) {
@@ -443,6 +473,7 @@ function initGlobe() {
 
 initPanelTimeline();
 initMobileNav();
+injectLogoutButton();
 initGlobeNarrationPanel(() => lastContinentNarrationPayload);
 
 const globeApi = initGlobe();

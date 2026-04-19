@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Sign In — World History Explorer</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/login.css" />
+</head>
+<body class="login-body">
+
+  <!-- Animated ambient orbs -->
+  <div class="login-bg" aria-hidden="true">
+    <div class="login-bg__orb login-bg__orb--1"></div>
+    <div class="login-bg__orb login-bg__orb--2"></div>
+    <div class="login-bg__orb login-bg__orb--3"></div>
+  </div>
+
+  <main class="login-main">
+    <div class="login-card">
+
+      <!-- Branding -->
+      <div class="login-logo" aria-label="World History Explorer">
+        <span class="login-logo__icon" aria-hidden="true">◉</span>
+        <div class="login-logo__text">
+          <span class="login-logo__name">World History Explorer</span>
+          <span class="login-logo__sub">Interactive 3D Earth · History · Multimedia</span>
+        </div>
+      </div>
+
+      <h1 class="login-title">Sign in to explore</h1>
+
+      <!-- Login form -->
+      <form class="login-form" id="loginForm" novalidate>
+
+        <div class="login-field">
+          <label class="login-field__label" for="loginUsername">Username</label>
+          <input
+            class="login-field__input"
+            type="text"
+            id="loginUsername"
+            name="username"
+            autocomplete="username"
+            placeholder="Enter your username"
+            required
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="login-field">
+          <label class="login-field__label" for="loginPassword">Password</label>
+          <input
+            class="login-field__input"
+            type="password"
+            id="loginPassword"
+            name="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+
+        <p class="login-error" id="loginError" role="alert" hidden></p>
+
+        <button type="submit" class="login-btn" id="loginSubmit">
+          <span class="login-btn__text">Enter the Explorer</span>
+          <span class="login-btn__arrow" aria-hidden="true">→</span>
+        </button>
+
+      </form>
+
+      <p class="login-hint">Any non-empty username &amp; password grants access.</p>
+
+    </div>
+  </main>
+
+  <!-- Welcome overlay — shown briefly after successful login -->
+  <div class="login-welcome" id="loginWelcome" hidden aria-live="assertive" role="status">
+    <div class="login-welcome__card">
+      <span class="login-welcome__globe" aria-hidden="true">🌍</span>
+      <h2 class="login-welcome__title" id="loginWelcomeTitle">Welcome!</h2>
+      <p class="login-welcome__sub">Loading your world…</p>
+      <div class="login-welcome__bar" aria-hidden="true">
+        <div class="login-welcome__bar-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/login.js"></script>
+</body>
+</html>

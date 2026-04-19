@@ -1,9 +1,13 @@
+import { requireLogin, injectLogoutButton } from './auth.js';
 import { initThemeSystem } from './theme.js';
 import { initMobileNav } from './mobile-nav.js';
+
+requireLogin();
 import { CONTINENTS, CONTINENT_TIMELINES } from './data.js';
 import { initContinentTimelinePanel } from './continentTimeline.js';
 
 initMobileNav();
+injectLogoutButton();
 
 const continentSelect = document.getElementById('continentTimelineSelect');
 if (continentSelect) {

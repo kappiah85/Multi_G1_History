@@ -22,6 +22,17 @@ export function buildQuizForm(questions, namePrefix) {
   const wrap = document.createElement('div');
   wrap.className = 'quiz-form quiz-form--sequential';
 
+  /* Visual progress bar */
+  const progressBar = document.createElement('div');
+  progressBar.className = 'quiz-progress';
+  progressBar.setAttribute('role', 'progressbar');
+  progressBar.setAttribute('aria-valuemin', '0');
+  progressBar.setAttribute('aria-valuemax', String(questions.length));
+  progressBar.setAttribute('aria-valuenow', '1');
+  const progressFill = document.createElement('div');
+  progressFill.className = 'quiz-progress__fill';
+  progressBar.appendChild(progressFill);
+
   const progress = document.createElement('p');
   progress.className = 'quiz-step-progress';
   progress.setAttribute('aria-live', 'polite');
@@ -59,6 +70,7 @@ export function buildQuizForm(questions, namePrefix) {
   summary.setAttribute('role', 'status');
   summary.hidden = true;
 
+  wrap.appendChild(progressBar);
   wrap.appendChild(progress);
   wrap.appendChild(card);
   wrap.appendChild(feedback);
@@ -110,6 +122,8 @@ export function buildQuizForm(questions, namePrefix) {
   function showSummary() {
     clearAdvanceTimer();
     progress.textContent = 'Quiz complete';
+    progressFill.style.width = '100%';
+    progressBar.setAttribute('aria-valuenow', String(questions.length));
     card.innerHTML = '';
     revealBtn.hidden = true;
     nextAfterRevealBtn.hidden = true;
@@ -151,6 +165,9 @@ export function buildQuizForm(questions, namePrefix) {
 
     const item = questions[index];
     progress.textContent = `Question ${index + 1} of ${questions.length}`;
+    const pct = ((index + 1) / questions.length) * 100;
+    progressFill.style.width = `${pct}%`;
+    progressBar.setAttribute('aria-valuenow', String(index + 1));
 
     card.innerHTML = '';
     const fieldset = document.createElement('fieldset');
