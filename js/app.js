@@ -141,9 +141,10 @@ function openPanel(continentId) {
     navBackdrop.hidden = true;
     navBackdrop.classList.remove('is-visible');
   }
-  document.body.style.overflow = '';
 
   const narrow = window.matchMedia('(max-width: 768px)').matches;
+  /* Keep the page from scrolling behind the bottom sheet on phones. */
+  document.body.style.overflow = narrow ? 'hidden' : '';
   video.preload = narrow ? 'none' : 'metadata';
 
   panel.classList.add('is-open');
@@ -180,6 +181,8 @@ function closePanel() {
   setTimeout(() => {
     if (!backdrop.classList.contains('is-visible')) backdrop.hidden = true;
   }, 320);
+
+  document.body.style.overflow = '';
 }
 
 const EARTH_RADIUS = 1;
