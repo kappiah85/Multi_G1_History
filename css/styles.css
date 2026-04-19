@@ -1899,10 +1899,13 @@ body.map-panel-open {
    ============================================================================ */
 
 /* ── Site Header ── */
+/* z-index must exceed every backdrop/sheet in the root context (70, 90…)
+   so that the fixed .site-nav inside this stacking context (created by
+   backdrop-filter) still paints above those elements. */
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 55;
+  z-index: 200;
   height: 56px;
   background: var(--header-bg);
   backdrop-filter: blur(14px);
