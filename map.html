@@ -48,18 +48,11 @@
         <span class="chapter-label" aria-hidden="true">🗺️ World Map Explorer</span>
         <h2 id="map-heading" class="map-page-header__title">Interactive Country Map</h2>
         <p class="map-page-header__lead">
-          <strong>DDA</strong> or <strong>Bresenham</strong> rasterizes country borders — no <code>stroke()</code>.
+          <strong>DDA</strong> rasterizes country borders — no <code>stroke()</code>.
           Click a country for a historical snapshot. Selection uses <strong>ray-casting point-in-polygon</strong>.
         </p>
       </div>
       <div class="map-page-header__controls">
-        <label class="field-label field-label--inline">
-          Border algorithm
-          <select id="mapLineMode" class="field-select" aria-label="Border line rasterization mode">
-            <option value="dda">DDA</option>
-            <option value="bresenham">Bresenham</option>
-          </select>
-        </label>
         <button
           type="button"
           id="btnMapBaseToggle"

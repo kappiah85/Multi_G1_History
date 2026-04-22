@@ -33,7 +33,7 @@ const timelinePanelApi = initContinentTimelinePanel({
   canvas: document.getElementById('continentTimelineCanvas'),
   continentSelect,
   playBtn: document.getElementById('btnContinentTimelinePlay'),
-  lineModeSelect: document.getElementById('continentLineMode'),
+  lineModeSelect: null,
   statusEl: document.getElementById('continentTimelineStatus'),
   getEvents: (id) => CONTINENT_TIMELINES[id] || [],
 });

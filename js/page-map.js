@@ -16,7 +16,7 @@ const mapApi =
   canvas &&
   initWorldMap(canvas, {
     ui,
-    lineModeSelect: document.getElementById('mapLineMode'),
+    lineModeSelect: null,
     statusEl: document.getElementById('mapLoadStatus'),
   });
 
