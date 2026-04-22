@@ -19,6 +19,16 @@ if (continentSelect) {
   }
 }
 
+function applyContinentFromUrl(selectEl) {
+  if (!selectEl) return;
+  const url = new URL(window.location.href);
+  const id = url.searchParams.get('continent');
+  if (!id) return;
+  const exists = CONTINENTS.some((c) => c.id === id);
+  if (!exists) return;
+  selectEl.value = id;
+}
+
 const timelinePanelApi = initContinentTimelinePanel({
   canvas: document.getElementById('continentTimelineCanvas'),
   continentSelect,
@@ -27,5 +37,17 @@ const timelinePanelApi = initContinentTimelinePanel({
   statusEl: document.getElementById('continentTimelineStatus'),
   getEvents: (id) => CONTINENT_TIMELINES[id] || [],
 });
+
+applyContinentFromUrl(continentSelect);
+
+// Optional: allow `&autoplay=1` from the globe page.
+try {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get('autoplay') === '1') {
+    queueMicrotask(() => document.getElementById('btnContinentTimelinePlay')?.click());
+  }
+} catch {
+  /* ignore */
+}
 
 initThemeSystem({ timelinePanelApi });

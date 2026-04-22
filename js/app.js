@@ -8,39 +8,9 @@ requireLogin();
 import { initGlobeNarrationPanel } from './ui-controls.js';
 import { stopContinentNarration, speakContinentNarrationFromData, getContinentNarratorAuto } from './multimedia.js';
 import { CONTINENTS, CONTINENT_TIMELINES, latLonFromUV, continentFromLatLon } from './data.js';
-import { runTimelineAnimation, clearTimelineCanvas } from './continentTimeline.js';
-
-let panelAnimToken = 0;
 let panelContinentId = null;
 /** Last opened continent row (for “Play narration” + auto-read; wired in ui-controls.js). */
 let lastContinentNarrationPayload = null;
-
-function cancelPanelTimeline() {
-  panelAnimToken += 1;
-  const canvas = document.getElementById('panelTimelineCanvas');
-  if (canvas) clearTimelineCanvas(canvas);
-}
-
-function initPanelTimeline() {
-  const canvas = document.getElementById('panelTimelineCanvas');
-  const playBtn = document.getElementById('panelTimelinePlay');
-  const lineMode = document.getElementById('panelTimelineLineMode');
-  const statusEl = document.getElementById('panelTimelineStatus');
-  if (!canvas || !playBtn) return;
-
-  playBtn.addEventListener('click', async () => {
-    if (!panelContinentId) return;
-    const my = ++panelAnimToken;
-    const mode = lineMode?.value === 'bresenham' ? 'bresenham' : 'dda';
-    await runTimelineAnimation(canvas, {
-      continentId: panelContinentId,
-      mode,
-      getEvents: (id) => CONTINENT_TIMELINES[id] || [],
-      statusEl,
-      isCancelled: () => my !== panelAnimToken,
-    });
-  });
-}
 
 function findContinentData(id) {
   return CONTINENTS.find((c) => c.id === id) || null;
@@ -99,10 +69,9 @@ function openPanel(continentId) {
   }
 
   panelContinentId = data.id;
-  cancelPanelTimeline();
-  const panelTlStatus = document.getElementById('panelTimelineStatus');
-  if (panelTlStatus) {
-    panelTlStatus.textContent = 'Press “Play timeline” to draw this region with DDA/Bresenham, circles, and Bézier chords.';
+  const openTimelineLink = document.getElementById('panelOpenTimeline');
+  if (openTimelineLink) {
+    openTimelineLink.setAttribute('href', `timeline.html?continent=${encodeURIComponent(data.id)}&autoplay=1`);
   }
 
   const imagesEl = document.getElementById('panelImages');
@@ -189,7 +158,6 @@ function closePanel() {
   if (ytWrap) ytWrap.hidden = true;
   video.hidden = false;
   panelContinentId = null;
-  cancelPanelTimeline();
 
   /* Restore empty state in the sidebar */
   const emptyState = document.getElementById('panelEmptyState');
@@ -471,7 +439,6 @@ function initGlobe() {
   return { applyGlobeTheme };
 }
 
-initPanelTimeline();
 initMobileNav();
 injectLogoutButton();
 initGlobeNarrationPanel(() => lastContinentNarrationPayload);
@@ -479,5 +446,4 @@ initGlobeNarrationPanel(() => lastContinentNarrationPayload);
 const globeApi = initGlobe();
 initThemeSystem({
   globeApplyTheme: globeApi?.applyGlobeTheme,
-  timelinePanelApi: { refreshClear: cancelPanelTimeline },
 });

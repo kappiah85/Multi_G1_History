@@ -88,7 +88,6 @@
           <button type="button" class="feature-chip" data-chip-section="panelEvents">📚 History</button>
           <button type="button" class="feature-chip" data-chip-section="panelStats">📊 Statistics</button>
           <button type="button" class="feature-chip" data-chip-section="panelImages">🖼 Images</button>
-          <button type="button" class="feature-chip" data-chip-section="panelTimelineCanvas">📅 Timeline</button>
           <button type="button" class="feature-chip" data-chip-section="panelNarrationBlock">🎙 Narration</button>
           <button type="button" class="feature-chip" data-chip-section="panelVideoYoutubeWrap">🎬 Video</button>
         </div>
@@ -120,29 +119,13 @@
           <h3 class="info-panel__subtitle">Timeline highlights</h3>
           <ul class="event-list" id="panelEvents"></ul>
 
-          <h3 class="info-panel__subtitle">Timeline drawing</h3>
+          <h3 class="info-panel__subtitle">Full timeline</h3>
           <p class="info-panel__timeline-lead">
-            Animated timeline for <strong>this region</strong>: vertical spine (DDA or Bresenham),
-            midpoint circles at each event, and clipped quadratic Bézier chords—same raster pipeline as the Timeline page.
+            Open the Timeline page to view the animated drawing (DDA/Bresenham spine, midpoint circles, Bézier chords, and clipping).
           </p>
-          <div class="panel-timeline-toolbar">
-            <label class="panel-timeline-toolbar__label">
-              Algorithm
-              <select id="panelTimelineLineMode">
-                <option value="dda">DDA</option>
-                <option value="bresenham">Bresenham</option>
-              </select>
-            </label>
-            <button type="button" id="panelTimelinePlay" class="btn btn--primary btn--sm">▶ Play timeline</button>
-          </div>
-          <canvas
-            id="panelTimelineCanvas"
-            class="panel-timeline-canvas"
-            width="300"
-            height="420"
-            aria-label="Animated continent timeline canvas"
-          ></canvas>
-          <p id="panelTimelineStatus" class="timeline-status panel-timeline-status">Open a region from the globe, then press Play timeline.</p>
+          <a id="panelOpenTimeline" class="btn btn--primary btn--sm btn--full" href="timeline.html">
+            📅 Open Timeline for this continent
+          </a>
 
           <h3 class="info-panel__subtitle">Reference maps</h3>
           <div class="media-row" id="panelImages"></div>

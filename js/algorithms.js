@@ -345,3 +345,73 @@ export function getAlgorithmLegendItems() {
     'Bottom grey line: full DDA segment outside the pedagogical clip region.',
   ];
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   COLOUR MODEL: HSV ↔ RGB
+   HSV separates hue (colour wheel position) from saturation and brightness,
+   making it intuitive to generate perceptually-distinct colours by cycling hue.
+   Used by the timeline to assign each event node a unique colour.
+───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * HSV → RGB. h ∈ [0, 360), s ∈ [0, 1], v ∈ [0, 1].
+ * Returns a CSS hex string '#rrggbb'.
+ * Algorithm: sector-based conversion splitting the hue wheel into 6 × 60° segments.
+ */
+export function hsvToRgb(h, s, v) {
+  const f = (n) => {
+    const k = (n + h / 60) % 6;
+    return v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+  };
+  const r = Math.round(f(5) * 255);
+  const g = Math.round(f(3) * 255);
+  const b = Math.round(f(1) * 255);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+/**
+ * RGB → HSV. r, g, b ∈ [0, 255].
+ * Returns { h ∈ [0, 360), s ∈ [0, 1], v ∈ [0, 1] }.
+ */
+export function rgbToHsv(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d !== 0) {
+    if (max === r)      h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else                h = (r - g) / d + 4;
+    h = ((h * 60) + 360) % 360;
+  }
+  return { h, s: max ? d / max : 0, v: max };
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   2D TRANSFORMATION: ROTATION MATRIX
+   Rotates a point (x, y) around a centre (cx, cy) by angleRad.
+
+   Matrix form (homogeneous coordinates):
+     [ cos θ  -sin θ   cx(1-cos θ) + cy·sin θ ]   [ x ]
+     [ sin θ   cos θ   cy(1-cos θ) - cx·sin θ ] × [ y ]
+     [   0       0               1             ]   [ 1 ]
+
+   Used in the timeline to rotate Bézier control-point offsets per link,
+   producing organically-varied curve directions.
+───────────────────────────────────────────────────────────────────────────── */
+
+/**
+ * 2D rotation — rotates point (x, y) by angleRad around centre (cx, cy).
+ * @returns {{ x: number, y: number }}
+ */
+export function rotate2D(x, y, angleRad, cx = 0, cy = 0) {
+  const cos = Math.cos(angleRad);
+  const sin = Math.sin(angleRad);
+  const dx = x - cx;
+  const dy = y - cy;
+  return {
+    x: cx + cos * dx - sin * dy,
+    y: cy + sin * dx + cos * dy,
+  };
+}
